@@ -1,0 +1,42 @@
+playlist_display_mode = classic
+mpd_crossfade_time = 0
+data_fetching_delay = no
+incremental_seeking = yes
+message_delay_time = 1
+mouse_support = no
+volume_change_step = 5
+autocenter_mode = yes
+
+display_bitrate = no
+header_visibility = yes
+titles_visibility = no
+
+color1 = white
+color2 = white
+
+current_item_prefix = $r
+selected_item_prefix = " "
+progressbar_look = "── "
+
+browser_playlist_prefix = "$8playlist$9 "
+
+alternative_ui_separator_color = default
+empty_tag_color = default
+main_window_color = default
+progressbar_elapsed_color = default:b
+progressbar_color = black
+
+state_flags_color = default
+statusbar_time_color = default
+# player_state_color = default
+window_border_color = default
+
+alternative_header_first_line_format = $0{%n. }{%t}|{%f}
+alternative_header_second_line_format = {{%a - }{%b} {[%y]}|{%D}}
+browser_sort_format = {%a - }{%t}|{%f} {[%l]}
+song_list_format = $0{%a - }{%t}|{%f}$R{%l}$9
+song_status_format = {{$0%t}}{ $bfrom$/b %b}{ $bby$/b %a}|{%f}
+
+visualizer_type = spectrum
+visualizer_spectrum_smooth_look = no
+visualizer_spectrum_dft_size = 1

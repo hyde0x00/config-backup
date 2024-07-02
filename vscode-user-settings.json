@@ -1,0 +1,20 @@
+{
+    "security.workspace.trust.untrustedFiles": "open",
+    "cmake.configureOnOpen": true,
+    "editor.fontSize": 12,
+    "editor.fontFamily": "'Dejavu Sans Mono', 'monospace', monospace",
+    "editor.lineNumbers": "off",
+    "editor.wordWrap": "on",
+    "editor.cursorStyle": "block",
+    "editor.bracketPairColorization.enabled": false,
+    "editor.minimap.enabled": false,
+    "window.menuBarVisibility": "compact",
+    "vim.showmodename": false,
+
+    "editor.autoClosingBrackets": "never",
+    "editor.autoClosingQuotes": "never", 
+    "html.autoClosingTags": false,
+    "window.titleBarStyle": "custom",
+    "editor.autoIndent": "keep",
+    "window.zoomLevel": 1,
+}

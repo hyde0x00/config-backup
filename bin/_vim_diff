@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# fu! Diff()
+#   if empty(expand('%'))
+#     echohl ErrorMsg | echo "No file name" | echohl None | return
+#   endif
+#   if !filereadable(expand('%'))
+#     echohl ErrorMsg | echo "Not a file" | echohl None | return
+#   endif
+#   silent keepalt w! /tmp/_vim_diff
+#   silent exec "!_vim_diff '%'"
+#   redraw!
+#   if v:shell_error == 1
+#     echo "No changes"
+#   endif
+# endfu
+# 
+# command! Diff call Diff()
+# nnoremap <silent> <Leader>d :Diff<CR>
+
+file="$1"
+edit="/tmp/_vim_diff"
+
+trap 'rm "$edit"' EXIT
+
+out="$(_diff_color "$file" "$edit")"
+
+[ -z "$out" ] && exit 1
+
+echo "$out" | pg

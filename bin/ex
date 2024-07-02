@@ -1,0 +1,73 @@
+#!/bin/sh
+
+basenoext() {
+	name="${1##*/}"
+	case "$name" in
+		*.tar.bz2|*.tar.gz|*.tar.xz|*.tar.zst) dotfield=3 ;;
+		*) dotfield=2 ;;
+	esac
+	echo "$name" | rev | cut -f "$dotfield"- -d '.' | rev
+}
+
+dupdirname() {
+	dir="$1"; n=1
+	while [ -e "$dir" ]; do 
+		dir="$1"_"$n"
+		n=$((n+1))
+	done
+	echo "$dir"
+}
+
+extract() {
+	if [ ! -f "$1" ]; then
+		printf "'%s' is not a file!\n" "$1"
+		return 1
+	fi
+
+	archive="$(realpath -- "$1")"
+	target="$(basenoext "$1")"
+	dest="$(dupdirname "$target")"
+
+	mkdir "$dest"
+	cd "$dest" || exit 1
+
+	case "$(lowercase "$archive")" in
+		*.tar.bz2|*.tar.gz|*.tar.xz) tar xvf "$archive" ;;
+		*.tar.zst) tar -I zstd -xf "$archive" ;;
+		*.tbz2) tar xvjf "$archive" ;;
+		*.tgz) tar xvzf "$archive" ;;
+		*.cbt|*.txz|*.tar) tar xvf "$archive" ;;
+		*.7z) 7za e "$archive" ;;
+		*.arc) arc e "$archive" ;;
+		*.bz2) bunzip2 "$archive" ;;
+		*.cba|*.ace) unace x "$archive" ;;
+		*.cbr|*.rar) unrar x -ad "$archive" ;;
+		*.cbz|*.epub|*.zip) unzip "$archive" ;;
+		*.cpio) cpio -id < "$archive" ;;
+		*.exe) cabextract "$archive" ;;
+		*.gz) gunzip "$archive" ;;
+		*.lzma) unlzma "$archive" ;;
+		*.xz) unxz "$archive" ;;
+		*.zpaq) zpaq x "$archive" ;;
+		*.z|*.Z) uncompress "$archive" ;;
+		*.zlib) zlib-flate -uncompress < "$archive" > "$archive.tmp" && \
+				mv "$archive.tmp" "${1%.*zlib}" && rm -f "$archive" ;;
+		*) 
+			cd ..
+			rmdir -- "$dest"
+			return 1
+		;;
+	esac
+
+	out="$(find . -mindepth 1 -maxdepth 1 -type d)"
+	dir="./$target"
+
+	if [ "$out" = "$dir" ]; then
+		mv -- "$dir"/.* "$dir"/* . 2>/dev/null
+		rmdir -- "$dir" 2>/dev/null
+	fi
+
+	cd ..
+}
+
+for x in "$@"; do extract "$x"; done

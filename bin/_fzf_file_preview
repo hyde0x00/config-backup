@@ -1,0 +1,16 @@
+#!/bin/sh
+
+filetype="$(file --mime -b -L -- "$1")"
+
+showtype() {
+	type="$(echo "$filetype" | cut -d ';' -f 1)"
+	colors="$(tput setaf 8 rev)"
+	padding="$((COLUMNS + ${#colors}))"
+
+	printf "%${padding}s\n" "$colors$type"
+}
+
+case "$filetype" in
+	*empty*|*text*) cat -- "$1" ;;
+	*) showtype ;;
+esac

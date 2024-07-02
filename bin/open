@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# https://stackoverflow.com/questions/16760378/how-to-check-if-a-file-is-binary 
+
+if [ $# -ne 1 ]; then
+	echo "usage: $(basename "$0") <file>"
+	exit 1
+fi
+
+filetype="$(file --mime -b -L -- "$1")"
+
+case "$filetype" in 
+	*empty*|*text*) $EDITOR "$1" ;;
+	*) xdg-open "$1" ;;
+esac

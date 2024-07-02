@@ -1,0 +1,9 @@
+#!/bin/sh
+
+print_hex() {
+	v="$(uppercase "$1")"
+	echo "obase=16; $v" | bc
+}
+
+if [ ! -t 0 ]; then print_hex; fi
+if [ -n "$1" ]; then echo "$*" | print_hex; fi

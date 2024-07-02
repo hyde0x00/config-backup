@@ -1,0 +1,11 @@
+#!/bin/sh
+
+printlen() {
+	IFS='\n'
+	while read -r line; do
+		printf '%d\n' "${#line}"
+	done
+}
+
+if [ ! -t 0 ]; then printlen; fi
+if [ -n "$1" ]; then echo "$*" | printlen; fi

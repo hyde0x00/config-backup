@@ -1,0 +1,25 @@
+#!/bin/sh
+
+if [ -z "$DISPLAY" ]; then
+	printf '%s: Display not set, not in Xorg?\n' "$(basename $0)"
+	exit 1
+fi
+
+action="${1:-copy}"
+buf='/tmp/vi-clipboard'
+
+case "$action" in
+	y|copy|yank) 
+		tee > "$buf"
+		xsel --clipboard -i < "$buf" 2>/dev/null
+		cat "$buf"
+		;;
+	d|cut) 
+		tee > "$buf"
+		xsel --clipboard -i < "$buf" 2>/dev/null
+		;;
+	p|paste) 
+		xsel --clipboard -o > "$buf" 2>/dev/null
+		cat "$buf" 
+		;;
+esac

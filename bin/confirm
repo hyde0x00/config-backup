@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ -n "$1" ]; then
+	msg="$*"
+else
+	msg="Continue?"
+fi
+
+printf "%s [y/n] " "$msg";
+read -r yn
+
+case "$(lowercase "$yn")" in 
+	y|yes) exit 0 ;;
+	n|no) exit 1 ;;
+	*) confirm "$*" ;;
+esac

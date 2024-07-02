@@ -1,0 +1,55 @@
+#!/bin/sh
+
+set -e
+
+if tmux has-session -t=main 2>/dev/null; then
+	tmux attach -t main
+	exit 0
+fi
+
+cd ~
+tmux new-session -d -s main
+
+tmux send-keys -t main "vi $NOTES_DIR/sec/ru" Enter 
+tmux new-window
+
+tmux send-keys -t main "vi $NOTES_DIR/sec/unsorted" Enter 
+tmux new-window
+
+cd "$HOME/prj/lab"
+tmux new-session -d -s prj
+tmux send-keys -t prj "vi main.c" Enter
+tmux new-window
+
+cd "$HOME/code/mw"
+tmux new-session -d -s mw
+tmux send-keys -t mw "cd ~/code/mw" Enter
+
+tmux send-keys -t mw "cd Coldfire" Enter
+tmux send-keys -t mw "vi README.md" Enter 
+tmux new-window
+tmux send-keys -t mw "cd OffensiveGolang" Enter
+tmux send-keys -t mw "vi README.md" Enter 
+tmux new-window
+tmux send-keys -t mw "cd OffsecDev" Enter
+tmux send-keys -t mw "vi README.md" Enter 
+tmux new-window
+tmux send-keys -t mw "cd OffensiveCpp" Enter
+tmux send-keys -t mw "vi README.md" Enter 
+tmux new-window
+tmux send-keys -t mw "cd OffensiveZig" Enter
+tmux send-keys -t mw "vi README.md" Enter 
+tmux new-window
+tmux send-keys -t mw "cd OffensiveCSharp" Enter
+tmux send-keys -t mw "vi README.md" Enter 
+tmux new-window
+tmux send-keys -t mw "cd OffensiveNim" Enter
+tmux send-keys -t mw "vi README.md" Enter 
+tmux new-window
+
+cd "$HOME/dl/_docs"
+tmux new-session -d -s docs
+tmux send-keys -t docs "vi AssemblyProgrammersJournal/*" Enter
+tmux new-window
+
+tmux attach -t main

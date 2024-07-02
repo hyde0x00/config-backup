@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# no trailing whitespace
+sed 's/\s\+$//g'

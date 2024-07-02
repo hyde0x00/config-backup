@@ -1,0 +1,9 @@
+#!/bin/sh
+
+print_dec() {
+	v="$(uppercase "$1")"
+	echo "ibase=16; $v" | bc
+}
+
+if [ ! -t 0 ]; then print_dec; fi
+if [ -n "$1" ]; then echo "$*" | print_dec; fi

@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# set -e
+
+backup() {
+	confirm "Synchronize files?" || exit 1
+
+	dir="$1"
+
+	if [ ! -d "$dir" ]; then
+		echo "Backup directory not found!"
+		exit 1
+	fi
+
+	echo "Backing up to '$dir'"
+
+	dconf dump / > "$dir"/dconf-settings.ini
+
+	cp /home/s/.mozilla/firefox/*.default-release/prefs.js "$dir"
+	cp /home/s/.config/Code/User/settings.json "$dir"/vscode-user-settings.json
+	cp /home/s/.config/mimeapps.list "$dir"
+
+	[ -d "$HOME/bin/" ] && rsync -rtv "$HOME/bin/" "$dir/bin"
+	[ -d "$HOME/.files/" ] && rsync -rtv "$HOME/.files/" "$dir/dotfiles"
+	[ -d "$NOTES_DIR/" ] && rsync -rtv "$NOTES_DIR/" "$dir/notes"
+}
+
+upload() {
+	confirm "Upload to git?" || exit 1
+
+	cd "$1" || exit 1
+
+	zip -r secret.zip notes
+	zip -u secret.zip bin/backup
+	zip -e -P "$PASSWORD" tmp secret.zip
+	mv tmp.zip .DS_Store
+
+	git checkout --orphan latest_branch
+	git add -A
+
+	git rm --cached -r secret.zip
+	git rm --cached -r notes/
+
+	git commit -am "upload"
+	git branch -D main
+	git branch -m main
+	git push -f origin main
+
+	rm secret.zip 2>/dev/null
+	rm .DS_Store 2>/dev/null
+}
+
+PASSFILE="$HOME/.backup-password"
+
+if [ ! -f "$PASSFILE" ]; then
+	echo "'$PASSFILE' not found"
+	exit 1
+fi
+
+PASSWORD="$(cat "$PASSFILE")"
+
+if [ -z "$PASSWORD" ]; then
+	echo "PASSWORD not set"
+	exit 1
+fi
+
+if [ -z "$BACKUP_DIR" ]; then
+	echo "BACKUP_DIR not set"
+	exit 1
+fi
+
+if [ -d "$BACKUP_DIR" ]; then
+	mkdir -p "$BACKUP_DIR"
+fi
+
+backup "$BACKUP_DIR"
+upload "$BACKUP_DIR"

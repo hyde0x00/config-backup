@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "h noaction
+, prev-file
+. next-file" > "$HOME/.lesskey"
+
+less "$@"

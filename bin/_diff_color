@@ -1,0 +1,19 @@
+#!/bin/sh
+
+GREY="$(tput setaf 8)"
+BRED="$(tput setaf 9)"
+BGREEN="$(tput setaf 10)"
+RESET=$'\e[0;0m'
+
+colorize() {
+	while read -r line; do
+		case "$line" in
+			[0-9]*|---) echo "$GREY$line$RESET" ;;
+			'<'*) echo "$BRED$line$RESET" ;;
+			'>'*) echo "$BGREEN$line$RESET" ;;
+			*) echo "$RESET$line$RESET" ;;
+		esac
+	done
+}
+
+diff "$@" | colorize

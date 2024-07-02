@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# no blank line
+sed '/^\s*$/d'

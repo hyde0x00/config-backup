@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# https://en.wikipedia.org/wiki/Percent-encoding
+# https://secure.n-able.com/webhelp/nc_9-1-0_so_en/content/sa_docs/api_level_integration/api_integration_urlencoding.html
+
+urldecode() {
+	perl -pe 's/\%(\w\w)/chr hex $1/ge'
+}
+
+if [ ! -t 0 ]; then urldecode; fi
+if [ -n "$1" ]; then echo "$*" | urldecode; fi

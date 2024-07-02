@@ -1,0 +1,10 @@
+#!/bin/sh
+
+sel="$(man -k "${1:-.}" 2>/dev/null | ifne fzf)"
+
+[ -z "$sel" ] && exit 1
+
+section="$(printf "%s\n" "$sel" | cut -d' ' -f2 | sed 's/(\(.*\))/\1/')"
+manpage="$(printf "%s\n" "$sel" | cut -d' ' -f1)"
+
+man "$section" "$manpage" 2>/dev/null

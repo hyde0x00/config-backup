@@ -1,0 +1,60 @@
+#!/bin/bash
+
+show_hidden=false
+show_preview=false
+vertical_split=false
+action=open
+
+_include=()
+_exclude=()
+
+include_name() {
+	if [ "${#_include[@]}" -gt 1 ]; then
+	      _include+=("-o")
+	fi
+	_include+=("-name" "$1")
+}
+
+exclude_name() {
+	_exclude+=("-not" "-name" "$1")
+}
+
+while getopts "aepxI:E:PV" opt; do
+	case $opt in
+		a) show_hidden=true ;;
+		e) action=edit ;;
+		p) action=print ;;
+		x) action=xdg_open ;;
+		I) include_name "$OPTARG" ;;
+		E) exclude_name "$OPTARG" ;;
+		P) show_preview=true ;;
+		V) vertical_split=true ;;
+		*) exit 1 ;;
+	esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+FZF_DEFAULT_OPTS+=" --preview='_fzf_file_preview {}'"
+
+[ "$show_preview" = "false" ] && FZF_DEFAULT_OPTS+=" --preview-window=hidden"
+[ "$vertical_split" = "true" ] && FZF_DEFAULT_OPTS+=" --preview-window=right"
+
+[ -z "$1" ] && set -- '.'
+
+for x in "$@"; do [ ! -e "$x" ] && echo "'$x': No such file or directory" >&2; done
+
+if [ "$show_hidden" = "true" ]; then
+	sel="$(for x in "$@"; do x="$(echo "$x" | tr -s '/' | sed 's/\/$//; s/^$/\//')"; find -L "$x" -type f "${_include[@]}" "${_exclude[@]}"; done 2>/dev/null | sed 's/^\.\///' | ifne fzf)"
+else
+	sel="$(for x in "$@"; do x="$(echo "$x" | tr -s '/' | sed 's/\/$//; s/^$/\//')"; find -L "$x" -type f "${_include[@]}" "${_exclude[@]}" -not -path "$x/.*" -not -path "$x*/.*"; done 2>/dev/null | sed 's/^\.\///' | ifne fzf)"
+fi
+
+[ -z "$sel" ] && exit 1
+
+case "$action" in
+	open) open "$sel" ;;
+	edit) $EDITOR "$sel" ;;
+	print) echo "$sel" ;;
+	xdg_open) xdg-open "$sel" ;;
+esac

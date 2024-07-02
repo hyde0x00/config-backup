@@ -1,0 +1,7 @@
+#!/bin/sh
+
+killall pulseaudio 2>/dev/null
+rm -r ~/.config/pulse/* 2>/dev/null
+sleep 5
+pulseaudio -k
+hd440

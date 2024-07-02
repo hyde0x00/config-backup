@@ -1,0 +1,78 @@
+#!/bin/sh
+
+exit 1
+
+# https://addons.mozilla.org/en-US/firefox/addon/browsec/
+# https://addons.mozilla.org/en-US/firefox/addon/link-gopher/
+# https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/
+# https://addons.mozilla.org/en-US/firefox/addon/tabhunter/
+# https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/
+# https://addons.mozilla.org/en-US/firefox/addon/wayback-machine_new/
+# https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/
+# https://addons.mozilla.org/en-US/firefox/addon/vimium-ff/
+# https://addons.mozilla.org/en-US/firefox/addon/duplicate-tabs-closer/
+# https://addons.mozilla.org/en-US/firefox/addon/old-reddit-redirect/
+# https://addons.mozilla.org/en-US/firefox/addon/auto-tab-discard/
+# https://addons.mozilla.org/en-US/firefox/addon/yandex-search-image/
+
+# https://extensions.gnome.org/extension/3193/blur-my-shell/
+# https://extensions.gnome.org/extension/1873/disable-unredirect-fullscreen-windows/
+
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-working_with_zones
+# set public # [?]
+# dnf -y install firewalld
+
+# dnf.conf
+# [main]
+# gpgcheck=True
+# installonly_limit=3
+# clean_requirements_on_remove=True
+# best=False
+# skip_if_unavailable=True
+#
+# keepcache=True
+# defaultyes=True
+# max_parallel_downloads=20
+
+# https://www.freedesktop.org/software/systemd/man/latest/journald.conf.html
+# journald.conf
+# Storage=volatile
+
+# dnf -y remove abrt-* audit rsyslog fedora-bookmarks gnome-software gnome-font-viewer gnome-contacts gnome-music gnome-screenshot gnome-connections gnome-text-editor gnome-calculator gnome-initial-setup gnome-calendar gnome-characters gnome-software gnome-system-monitor gnome-weather gnome-console gnome-maps gnome-disk-utility gnome-online-accounts gnome-photos baobab simple-scan rhythmbox gucharmap orca system-config-printer epiphany rygel mediawriter yelp libreoffice* gedit totem cheese rhythmbox totem zeitgeist*
+
+# dnf -y remove gnome-terminal
+# dnf -y install vte-profile vte291 alacritty
+
+# dnf -y install vim-X11 tmux fzf pass
+# dnf -y install vim-X11 git gcc make pkgconfig libX11-devel libXtst-devel libXi-devel
+# dnf -y install 
+# dnf -y install mpv mpv-libs mpd mpdevil wmctrl clipit xclip xsel
+# dnf -y install mozilla-openh264 ffmpegthumbnailer
+# dnf -y install calibre unoconov
+
+# dnf -y install zram*
+# systemctl enable zram-swap.service
+# systemctl start zram-swap.service
+
+# dnf -y install earlyoom
+
+#
+# echo "
+# [ids]
+# 
+# *
+# 
+# [main]
+# 
+# # Maps capslock to escape when pressed and control when held.
+# capslock = overload(control, esc)" > /etc/keyd/default.conf
+# 
+
+# cd "$HOME/src"
+# git clone https://github.com/rvaiya/keyd
+# cd keyd
+# make && sudo make install
+# sudo systemctl enable keyd && sudo systemctl start keyd
+
+# dnf -y remove *emoji*
+# dnf -y install google-noto-color-emoji-fonts google-noto-emoji-fonts unicode-emoji
