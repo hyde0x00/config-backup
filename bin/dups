@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Print duplicate lines only
+uniq -d 

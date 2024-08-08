@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# https://wiki.archlinux.org/title/Music_Player_Daemon
+# https://help.ubuntu.com/community/MPD
+# https://fedoramagazine.org/playing-music-on-your-fedora-terminal-with-mpd-and-ncmpcpp/
+# https://news.opensuse.org/2020/03/31/Listen-to-your-music-with-mpd-and-ncmpcpp/
+# [ -z "$(pgrep mpd)" ] && [ ! -s "~/.config/mpd/mpd.conf" ] && mpd 2>/dev/null
+# ncmpcpp -q
+
+MUSIC_DIR="$HOME/mu"
+
+if [ ! -d "$MUSIC_DIR" ]; then
+  echo "Directory not found: '$MUSIC_DIR'"
+  exit 1
+fi
+
+cd "$MUSIC_DIR" || exit 1
+
+extensions=(mp3 flac m3u mkv mkv mp4 webm)
+
+sel="$(for ext in "${extensions[@]}"; do 
+  find . -type f -name "*.$ext"
+done | sed 's/^\.\///' | sort -V | ifne fzf)"
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+open "$sel"

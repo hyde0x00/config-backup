@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if git rev-parse; then
+  url="$(git config --get remote.origin.url)"
+  echo "Opening '${url}'..."
+  open "$url"
+fi

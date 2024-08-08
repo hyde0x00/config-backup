@@ -1,0 +1,48 @@
+#!/bin/bash
+
+GREY="$(tput setaf 8)"
+BRIGHTRED="$(tput setaf 9)"
+BRIGHTGREEN="$(tput setaf 10)"
+RESET=$'\e[0;0m'
+
+usage() {
+  echo "Usage: $(basename "$0") -fp <file1> <file2>"
+  exit 1
+}
+
+colorize() {
+  while read -r line; do
+    case "$line" in
+      [0-9]*|---) echo "$GREY$line$RESET" ;;
+      '<'*) echo "$BRIGHTRED$line$RESET" ;;
+      '>'*) echo "$BRIGHTGREEN$line$RESET" ;;
+      *) echo "$RESET$line$RESET" ;;
+    esac
+  done
+}
+
+while getopts "fp" opt; do
+  case "$opt" in
+    f) force_color=true ;;
+    p) pager=true ;;
+    *) usage ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ "$#" -ne 2 ]; then
+  usage
+fi
+
+if diff -s "$@" &>/dev/null; then
+  exit 1
+fi
+
+if [ "$pager" == "true" ]; then
+  diff "$@" | colorize | ifne pg
+elif [ -t 1 ] || [ "$force_color" == "true" ]; then
+  diff "$@" | colorize
+else 
+  diff "$@"
+fi

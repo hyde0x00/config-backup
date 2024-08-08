@@ -1,0 +1,26 @@
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+
+[user]
+	email = mr.hyde.hi.im.high@bk.ru
+	name = hyde0x00
+
+[push]
+	autoSetupRemote = true
+
+[pager]
+ 	diff = pg -FRXsu
+
+[color "diff"]
+	meta = default
+	frag = brightblack
+	old = brightred
+	new = brightgreen
+	whitespace = default
+
+[color]
+	ui = auto

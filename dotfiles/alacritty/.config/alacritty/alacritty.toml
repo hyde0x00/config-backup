@@ -1,0 +1,62 @@
+# https://wiki.archlinux.org/title/Alacritty
+# https://alacritty.org/config-alacritty.html
+# https://github.com/alacritty/alacritty
+# https://github.com/alacritty/alacritty-theme
+# https://windowsterminalthemes.dev/
+
+[font]
+size = 12.0
+
+[font.normal]
+# family = "JetBrainsMono"
+family = "Menlo"
+
+[cursor]
+style = { blinking = "Always", shape = "Block" }
+blink_interval = 750
+blink_timeout = 0
+thickness = 0.1
+
+[colors]
+primary = { foreground = "0xffffff", background = "0x000000" }
+search.focused_match = { foreground = "0xffffff", background = "0xcd7800" }
+search.matches = { foreground = "0x000000", background = "0xffff55" }
+footer_bar = { foreground = "0xcd7800", background = "0x000000" }
+draw_bold_text_with_bright_colors = true
+
+[colors.normal]
+black = "0x000000"
+red = "0xcd0000"
+green = "0x00cd00"
+yellow = "0xcd7800"
+blue = "0x0000ff"
+magenta = "0xcd00cd"
+cyan = "0x00cdcd"
+white = "0xcdcdcd"
+
+[colors.bright]
+black = "0x7f7f7f"
+red = "0xff5555"
+green = "0x55ff55"
+yellow = "0xffff55"
+blue = "0x5555ff"
+magenta = "0xff55ff"
+cyan = "0x55ffff"
+white = "0xffffff"
+
+[keyboard]
+bindings = [{ key = "F11", action = "ToggleFullscreen" }]
+
+[mouse]
+hide_when_typing = true
+
+[[hints.enabled]]
+command = ""
+hyperlinks = false
+post_processing = false
+persist = false
+mouse.enabled = false
+regex = ""
+
+[window]
+dimensions = { columns = 80, lines = 24 }

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "use ifne from moreutils instead"
+exit 1
+
+# run command if the standard input is not empty
+read -r line || exit 1
+(echo "$line"; cat) | eval "$@"

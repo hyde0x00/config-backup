@@ -1,0 +1,21 @@
+#!/bin/sh
+
+#UA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1 L_y_n_x'
+UA='L_y_n_x'
+
+lynx="$(which lynx)"
+
+CFG='cfg'
+LSS='lss'
+
+[ ! -x "$lynx" ] && {
+        printf 'Lynx binary not found.\n'
+        exit 1
+}
+
+cd "$HOME" # tmux...
+
+[ -f "$HOME/.config/lynx/$CFG" ] && export LYNX_CFG="$HOME/.config/lynx/$CFG"
+[ -f "$HOME/.config/lynx/$LSS" ] && export LYNX_LSS="$HOME/.config/lynx/$LSS"
+
+exec "$lynx" --useragent="$UA" "$@" -nocolor

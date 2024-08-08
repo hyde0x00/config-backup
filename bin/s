@@ -1,0 +1,73 @@
+#!/bin/bash
+
+show_hidden=false
+exact_search=false
+match_filenames=false
+show_preview=false
+vertical_split=false
+
+_grepopts=()
+
+while getopts "aefiwI:E:PV" opt; do
+  case "$opt" in
+    a) show_hidden=true ;;
+    e) exact_search=true ;;
+    f) match_filenames=true ;;
+    i) _grepopts+=("--ignore-case") ;;
+    w) _grepopts+=("--word-regexp") ;;
+    I) _grepopts+=("--include=$OPTARG") ;;
+    E) _grepopts+=("--exclude=$OPTARG") ;;
+    P) show_preview=true ;;
+    V) vertical_split=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+FZF_DEFAULT_OPTS+=" --preview='__fzf_grep_preview {}'"
+FZF_DEFAULT_OPTS+=" --bind=alt-?:change-preview-window\(right\|bottom\)+refresh-preview"
+
+[ "$show_preview" == "false" ] && FZF_DEFAULT_OPTS+=" --preview-window=hidden"
+[ "$vertical_split" == "true" ] && FZF_DEFAULT_OPTS+=" --preview-window=right"
+[ "$exact_search" == "true" ] && FZF_DEFAULT_OPTS+=" --exact"
+[ "$match_filenames" == "false" ] && FZF_DEFAULT_OPTS+=" -d ':'" && FZF_DEFAULT_OPTS+=" -n '3..'"
+
+if [ -z "$1" ]; then
+  exit 1
+fi
+
+pattern="$1"; shift
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for x in "$@"; do
+  if [ ! -e "$x" ]; then
+    echo "'$x': No such file or directory" >&2
+  fi
+done
+
+if [ "$show_hidden" = "true" ]; then
+  sel="$(for x in "$@"; do
+    x="$(echo "$x" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//')"
+    find -L "$x" -type f -print0 \
+      | xargs -0 grep -nHIs "${_grepopts[@]}" -- "$pattern"
+  done 2>/dev/null | sed 's/^\.\///' | ifne fzf)"
+else
+  sel="$(for x in "$@"; do
+    x="$(echo "$x" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//')"
+    find -L "$x" -type f -not -path "$x/.*" -not -path "$x*/.*" -print0 \
+      | xargs -0 grep -nHIs "${_grepopts[@]}" -- "$pattern"
+  done 2>/dev/null | sed 's/^\.\///' | ifne fzf)"
+fi
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+file="$(echo "$sel" | cut -d ':' -f 1)"
+line="$(echo "$sel" | cut -d ':' -f 2)"
+
+$EDITOR +"$line" "$file"

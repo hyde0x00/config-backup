@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=SpoofDPI
+Comment=Bypass Deep Packet Inspection
+Exec=spoof-dpi
+Terminal=false
+Type=Application
+OnlyShowIn=GNOME;XFCE;LXDE;Unity;
+X-GNOME-Autostart-enabled=true

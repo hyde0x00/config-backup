@@ -1,0 +1,54 @@
+#!/bin/bash
+
+dir="$HOME/.local/share/Trash/files"
+
+have_files() {
+  count="$(find "$dir" -mindepth 1 -maxdepth 1 | wc -l)"
+  if [ "$count" == 0 ]; then
+    return 1
+  fi
+}
+
+list_trash_files() {
+  if ! have_files; then
+    echo "Trash is empty"
+    return 1
+  fi
+  content="$(tree -F "$dir")"
+  size="$(du -h "$dir" | cut -f 1)"
+  echo "${content} [${size}]"
+}
+
+move_to_trash() {
+  if [ ! -e "$1" ]; then
+    echo "cannot move to trash '$1': No such file or directory"
+    return 1
+  fi
+  if ! trash_err="$(gio trash "$1" 2>&1 >/dev/null)"; then
+    echo "$trash_err"
+    return 1
+  fi
+  echo "moved '$1' to trash" 
+}
+
+empty_trash() {
+  if have_files && confirm "Empty trash?"; then
+    gio trash --empty
+  fi
+}
+
+while getopts "e" opt; do
+   case "$opt" in
+     e) empty_trash ;;
+     *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+if [ -z "$1" ]; then
+    list_trash_files
+fi
+for file in "$@"; do
+  move_to_trash "$file"
+done

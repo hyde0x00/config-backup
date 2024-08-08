@@ -1,0 +1,48 @@
+#!/bin/bash
+
+show_hidden=false
+
+_grepopts=()
+
+while getopts "aiwI:E:" opt; do
+   case "$opt" in
+     a) show_hidden=true ;;
+     i) _grepopts+=("--ignore-case") ;;
+     w) _grepopts+=("--word-regexp") ;;
+     I) _grepopts+=("--include=$OPTARG") ;;
+     E) _grepopts+=("--exclude=$OPTARG") ;;
+     *) exit 1 ;;
+   esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+if [ -z "$1" ]; then
+  exit 1
+fi
+
+pattern="$1"; shift
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for x in "$@"; do
+  if [ ! -e "$x" ]; then
+    echo "'$x': No such file or directory" >&2
+  fi
+done
+
+if [ "$show_hidden" == "true" ]; then
+  for x in "$@"; do
+    x="$(echo "$x" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//')"
+    find -L "$x" -type f -print0 \
+      | xargs -0 grep -nHIs "${_grepopts[@]}" -- "$pattern"
+  done 2>/dev/null | sed 's/^\.\///'
+else
+  for x in "$@"; do
+    x="$(echo "$x" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//')"
+    find -L "$x" -type f -not -path "$x/.*" -not -path "$x*/.*" -print0 \
+      | xargs -0 grep -nHIs "${_grepopts[@]}" -- "$pattern"
+  done 2>/dev/null | sed 's/^\.\///'
+fi

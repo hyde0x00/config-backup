@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# fu! DiffOrigSh()
+#  if empty(expand('%'))
+#    echohl ErrorMsg | echo "No file name" | echohl None
+#    return
+#  elseif !filereadable(expand('%'))
+#    echohl ErrorMsg | echo "Not a file" | echohl None
+#    return
+#  endif
+#  let file = expand('%')
+#  let edit = '/tmp/vimdiff'
+#  silent exec "keepalt w! " . edit
+#  silent exec "!__vimdiff " . file . " " . edit . " 2>/dev/null"
+#  redraw!
+#  if v:shell_error == 1
+#    echo "No changes"
+#  endif
+# endfu
+# 
+# nnoremap <expr> <silent> <Leader>d DiffOrigSh()
+
+if [ $# -ne 2 ]; then
+  exit 1
+fi
+
+orig="$1"
+edit="$2"
+
+trap 'rm "$edit"' EXIT
+
+diffcolor -f -p "$orig" "$edit"

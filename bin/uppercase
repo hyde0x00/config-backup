@@ -1,0 +1,8 @@
+#!/bin/bash
+
+uppercase() {
+  sed 's/[a-zа-я]/\U&/g'
+}
+
+if [ ! -t 0 ]; then uppercase; fi
+if [ -n "$1" ]; then echo "$*" | uppercase; fi

@@ -1,0 +1,49 @@
+#!/bin/bash
+
+show_hidden=false
+show_preview=false
+vertical_split=false
+
+while getopts "an:PV" opt; do
+  case $opt in
+    a) show_hidden=true ;;
+    P) show_preview=true ;;
+    V) vertical_split=true ;;
+    *) return 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+[ "$show_preview" != "true" ] && FZF_DEFAULT_OPTS+=" --preview-window=hidden"
+[ "$vertical_split" == "true" ] && FZF_DEFAULT_OPTS+=" --preview-window=right"
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for x in "$@"; do
+  if [ ! -d "$x" ]; then
+    echo "'$x': Not a directory" >&2
+  fi
+done
+
+if [ "$show_hidden" == "true" ]; then
+  sel="$(for x in "$@"; do
+    x="$(echo "$x" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//')"
+    find -L "$x" -type d -mindepth 1
+  done 2>/dev/null | sed 's/^\.\///; s/$/\//' \
+    | ifne fzf --preview='tree -F -L 1 -- {} | sed "s/\/\/$/\//g"')"
+else
+  sel="$(for x in "$@"; do
+    x="$(echo "$x" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//')"
+    find -L "$x" -type d -mindepth 1 -not -path "$x/.*" -not -path "$x*/.*"
+  done 2>/dev/null | sed 's/^\.\///; s/$/\//' \
+    | ifne fzf --preview='tree -F -L 1 -- {} | sed "s/\/\/$/\//g"')"
+fi
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+echo "$sel"

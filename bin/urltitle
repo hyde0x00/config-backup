@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# https://unix.stackexchange.com/questions/103252/how-to-retrieve-a-webpages-title-using-the-command-line
+# https://unix.stackexchange.com/questions/102008/how-do-i-trim-leading-and-trailing-whitespace-from-each-line-of-some-output
+
+_trim_whitespace() {
+  awk '{$1=$1};1'
+}
+
+_cleanup_title() {
+  sed 's/ - Wikipedia//g' \
+  | sed 's/ - YouTube//g' \
+  | sed 's/ — Википедия//g' \
+  | sed 's/ | ВКонтакте//g' \
+  | noemoji | _trim_whitespace \
+  | sed 's/[“”]/"/g' | sed "s/’/'/g"
+}
+
+url_title() {
+  url="${1/www./}"
+  title="$(wget -qO- "$1" 2>/dev/null | perl -l -0777 -ne 'print $1 if /<title.*?>\s*(.*?)\s*<\/title/si;' 2>/dev/null | htmldecode 2>/dev/null)"
+
+  if [ -z "$title" ]; then
+    echo "$url" | htmldecode
+  else
+    title="$(echo "$title" | _cleanup_title)"
+    echo "[${title}](${url})"
+  fi
+}
+
+if [ ! -t 0 ]; then
+  while read -r line; do
+    for word in $line; do url_title "$word"; done
+  done
+fi
+if [ -n "$1" ]; then
+  for arg in "$@"; do url_title "$arg"; done
+fi

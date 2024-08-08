@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ -z "$NOTES_DIR" ]; then
+  echo "NOTES_DIR not set"
+  exit 1
+fi
+
+if [ ! -d "$NOTES_DIR" ]; then 
+  mkdir -p "$NOTES_DIR"
+fi
+
+cd "$NOTES_DIR" || exit 1
+
+while getopts "et" opt; do
+   case "$opt" in
+     e) vidir $(find . -type f); exit ;;
+     t) tree -F "$NOTES_DIR"; exit ;;
+  esac
+done 2>/dev/null
+
+if [ -z "$1" ]; then 
+  f "$@"
+else 
+  s -i "$@"
+fi

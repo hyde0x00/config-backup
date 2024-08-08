@@ -1,0 +1,20 @@
+# https://www.ccn.ucla.edu/wiki/index.php/Using_Screen
+# http://dotshare.it/category/terms/screen/
+# https://www.gnu.org/software/screen/manual/screen.html
+# https://www.gnu.org/software/screen/manual/html_node/String-Escapes.html
+# https://lists.gnu.org/archive/html/screen-users/2005-02/msg00008.html
+
+bind x
+bind ^x
+
+bind , prev
+bind . next
+bind w windowlist
+
+defscrollback 10000
+maptimeout 0
+startup_message off
+vbell off
+
+hardstatus alwayslastline "%{= kw}%?%-Lw%?[%{W}%n*%f%t%?[%u]%?]%{w}%?%+Lw%?%? %= %{w} %= %d %M%c"
+# hardstatus alwayslastline "%{= k}%{W}%-w[%n %t]%+w%-=%{W}%c"

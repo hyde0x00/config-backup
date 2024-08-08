@@ -1,0 +1,6 @@
+#!/bin/bash
+
+IFS=$'\n'
+while read -r line; do
+  echo "${#line} ${line}"
+done | sort -n | cut -d" " -f2-

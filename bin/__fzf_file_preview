@@ -1,0 +1,15 @@
+#!/bin/bash
+
+showtype() {
+  type="$(file --mime-type -b -L -- "$1")"
+  color="$(tput setaf 8 rev)"
+  pad="$((COLUMNS + ${#color}))"
+  printf "%${pad}s\n" "$color$type"
+}
+
+filetype="$(file -b -L -- "$1")"
+
+case "$filetype" in 
+  *text*) cat -- "$1" ;;
+  *) showtype "$1" ;;
+esac
