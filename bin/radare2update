@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+if ! confirm "Update and build radare2?"; then 
+  exit 1 
+fi 
+
+cd "$HOME/src"
+
+[ -d radare2/ ] && rm -rf radare2/
+
+git clone https://github.com/radareorg/radare2
+cd radare2/
+
+cp "$HOME/.backup/radare2/x" "libr/cons/d/"
+git apply "$HOME/.backup/radare2/r2-no-color-keys.patch"
+
+sh ./sys/install.sh
+
+r2pm -ci r2dec
+r2pm -ci r2ghidra

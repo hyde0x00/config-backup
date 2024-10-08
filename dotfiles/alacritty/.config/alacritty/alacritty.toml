@@ -1,0 +1,83 @@
+# https://alacritty.org/config-alacritty.html
+
+[font.normal]
+# family = 'JetBrainsMono'
+family = 'Menlo'
+
+[font.bold]
+style = 'Regular'
+
+[font.italic]
+style = 'Regular'
+
+[font.bold_italic]
+style = 'Regular'
+
+[font]
+size = 12.0
+
+[cursor]
+blink_interval = 750
+blink_timeout = 0
+thickness = 0.1
+
+[cursor.style]
+blinking = 'Always'
+shape = 'Block'
+
+[colors.primary]
+foreground = '0xffffff'
+background = '0x000000'
+
+[colors.footer_bar]
+foreground = '0xcd7800'
+background = '0x000000'
+
+[colors.search.focused_match]
+foreground = '0xffffff'
+background = '0xcd7800'
+
+[colors.search.matches]
+foreground = '0x000000'
+background = '0xffff78'
+
+[colors.normal]
+black   = '0x000000'
+red     = '0xcd0000'
+green   = '0x00cd00'
+yellow  = '0xcd7800'
+blue    = '0x0000ff'
+magenta = '0xcd00cd'
+cyan    = '0x00cdcd'
+white   = '0xcdcdcd'
+
+[colors.bright]
+black   = '0x787878'
+red     = '0xff7878'
+green   = '0x78ff78'
+yellow  = '0xffff78'
+blue    = '0x7878ff'
+magenta = '0xff78ff'
+cyan    = '0x78ffff'
+white   = '0xffffff'
+
+[colors]
+draw_bold_text_with_bright_colors = true
+
+[window.dimensions]
+columns = 80
+lines = 24
+
+[[hints.enabled]]
+command = ''
+hyperlinks = false
+post_processing = false
+persist = false
+mouse.enabled = false
+regex = ''
+
+[mouse]
+hide_when_typing = true
+
+[keyboard]
+bindings = [{ key = 'F11', action = 'ToggleFullscreen' }]

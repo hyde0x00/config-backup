@@ -1,0 +1,77 @@
+#!/bin/bash
+
+action=open
+
+show_hidden=false
+show_preview=false
+vertical_split=false
+
+include=()
+exclude=()
+
+include_name() {
+  if [ "${#include[@]}" -gt 1 ]; then
+        include+=("-o")
+  fi
+  include+=("-name" "$1")
+}
+
+exclude_name() {
+  exclude+=("-not" "-name" "$1")
+}
+
+while getopts "pexai:e:PV" opt; do
+  case $opt in
+    p) action=print ;;
+    e) action=edit ;;
+    x) action=xdg_open ;;
+    a) show_hidden=true ;;
+    i) include_name "$OPTARG" ;;
+    e) exclude_name "$OPTARG" ;;
+    P) show_preview=true ;;
+    V) vertical_split=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+FZF_DEFAULT_OPTS+=" --preview='__fzf_file_preview {}'"
+
+[ "$show_preview" == "false" ] && FZF_DEFAULT_OPTS+=" --preview-window=hidden"
+[ "$vertical_split" == "true" ] && FZF_DEFAULT_OPTS+=" --preview-window=right"
+
+[ -z "$1" ] && set -- '.'
+
+for path in "$@"; do
+  if [ ! -e "$path" ]; then
+    echo "'$path': No such file or directory" >&2
+  fi
+done
+
+trim_slash() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//'
+}
+
+find_files() {
+  if [ "$show_hidden" == "true" ]; then
+    find -L "$1" -type f "${include[@]}" "${exclude[@]}"
+  else
+    find -L "$1" -type f "${include[@]}" "${exclude[@]}" -not -path "$1/.*" -not -path "$1*/.*"
+  fi
+}
+
+sel="$(
+  for path in "$@"; do
+    find_files "$(trim_slash "$path")"
+  done 2>/dev/null | sed 's/^\.\///' | ifne fzf
+)"
+
+[ -z "$sel" ] && exit 1
+
+case "$action" in
+  open) open "$sel" ;;
+  print) echo "$sel" ;;
+  edit) $EDITOR "$sel" ;;
+  xdg_open) xdg-open "$sel" ;;
+esac

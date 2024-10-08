@@ -1,0 +1,16 @@
+#!/bin/bash
+
+file="$(echo "$1" | cut -d ':' -f 1)"
+line="$(echo "$1" | cut -d ':' -f 2)"
+
+start=$((line - (LINES / 2)))
+end=$((start + LINES - 1))
+
+while [ "$start" -lt 1 ]; do
+  offset="$offset\n"
+  start=$((start+1))
+done
+
+printf "$offset"
+sed -n -- "$start,$((end-1))"p "$file" 
+sed -n -- "$end"p "$file" | expand | cut -c 1-"$((COLUMNS-1))"

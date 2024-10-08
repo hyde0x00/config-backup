@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ -z "$MUSIC_DIR" ]; then
+  echo "MUSIC_DIR not set"
+  exit 1
+fi
+
+if [ ! -d "$MUSIC_DIR" ]; then
+  echo "Directory not found: $MUSIC_DIR"
+  exit 1
+fi
+
+cd "$MUSIC_DIR" || exit 1
+
+sel="$(find . -type f | sed 's/^\.\///' | sort -V | ifne fzf -m)"
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+IFS=$'\n'
+_sel=($sel)
+
+echo Playing:
+for file in ${_sel[@]}; do
+  echo " $file"
+done
+
+mpv "${_sel[@]}"

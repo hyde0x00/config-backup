@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =6
+let g:netrw_dirhist_6='/home/s/code/git'
+let g:netrw_dirhist_5='/home/s/prj/lab'
+let g:netrw_dirhist_4='/home/s/code/git'
+let g:netrw_dirhist_3='/home/s/code/git/git-gui'
+let g:netrw_dirhist_2='/home/s/code/git'
+let g:netrw_dirhist_1='/run/media/s/hdd/code/mw/VX-API/VX-API'
+let g:netrw_dirhist_0='/media/s/hdd/code/git'
+let g:netrw_dirhist_9='/media/s/hdd/code/qutebrowser/qutebrowser/misc'
+let g:netrw_dirhist_8='/home/s/.notes/prog'
+let g:netrw_dirhist_7='/tmp/test/dir2'

@@ -1,0 +1,18 @@
+# e scr.layout=a # fontsize 13
+e scr.layout=b # fontsize 12
+
+e scr.color=1
+eco x
+
+e asm.cmt.right=true
+e asm.cmt.col=100
+
+e hex.header=false
+e hex.offset=false
+
+e stack.size=512
+
+# e scr.utf8 = true
+
+# e io.cache=false
+# e dbg.bpinmas=0 

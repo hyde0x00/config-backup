@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# fu! DiffOrigSh()
+#   if empty(expand('%'))
+#     echohl ErrorMsg | echo "No file name" | echohl None
+#     return -1
+#   elseif !filereadable(expand('%'))
+#     echohl ErrorMsg | echo "Not a file" | echohl None
+#     return -1
+#   endif
+# 
+#   let file = fnameescape(expand('%'))
+#   let edit = '/tmp/difforig'
+# 
+#   silent exec "keepalt write! " . edit
+#   silent exec "!__difforig " . file . " " . edit . " 2>/dev/null"
+#   redraw!
+# 
+#   if v:shell_error == 1
+#     echo "No changes"
+#   endif
+# endfu
+#
+# nnoremap <expr> <silent> <Leader>d DiffOrigSh()
+
+if [ $# -ne 2 ]; then
+  exit 1
+fi
+
+file="$1"
+edit="$2"
+
+trap 'rm "$edit"' EXIT
+
+if diff -s "$file" "$edit" &>/dev/null; then
+  exit 1
+fi
+
+__diffcolor -p "$file" "$edit"
