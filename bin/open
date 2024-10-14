@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# https://stackoverflow.com/questions/16760378/how-to-check-if-a-file-is-binary 
+
+if [ $# -ne 1 ]; then
+  repo
+fi
+
+case "$(file --brief --dereference -- "$1")" in 
+  empty|*text*) $EDITOR "$1" ;;
+  *) xdg-open "$1" ;;
+esac
