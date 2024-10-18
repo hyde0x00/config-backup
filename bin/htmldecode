@@ -1,0 +1,3 @@
+#!/bin/bash
+
+perl -MHTML::Entities -pe 'decode_entities($_, 'UTF-8');'

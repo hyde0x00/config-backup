@@ -1,0 +1,76 @@
+#!/bin/bash
+
+noextname() {
+  case "$1" in
+    *.tar.bz2|*.tar.gz|*.tar.xz|*.tar.zst) field=3 ;;
+    *) field=2 ;;
+  esac
+  echo "$1" | rev | cut -d '.' -f "$field"- | rev
+}
+
+dupname() {
+  name="$1"
+  n=1
+  while [ -e "$name" ]; do
+    name="$1_$n"
+    n=$((n+1))
+  done
+  echo "$name"
+}
+
+extract() {
+  if [ ! -f "$1" ]; then
+    echo "'$1' is not a file!" >&2
+    return 1
+  fi
+
+  path="$(realpath -- "$1")"
+  srcdir="$(dirname "$path")"
+  base="$(basename "$path")"
+  target="$(noextname "$base")"
+
+  newdir="$(dupname "${srcdir}/${target}")"
+  mkdir "$newdir"; cd "$newdir"
+
+  echo "Extracting '$path' to '$newdir/'..."
+
+  case "$path" in
+    *.tar.bz2|*.tar.gz|*.tar.xz) tar xvf "$path" ;;
+    *.tar.zst) tar -I zstd -xf "$path" ;;
+    *.tbz2) tar xvjf "$path" ;;
+    *.tgz) tar xvzf "$path" ;;
+    *.cbt|*.txz|*.tar) tar xvf "$path" ;;
+    *.7z) 7za e "$path" ;;
+    *.arc) arc e "$path" ;;
+    *.bz2) bunzip2 "$path" ;;
+    *.cba|*.ace) unace x "$path" ;;
+    *.cbr|*.rar) unrar x -ad "$path" ;;
+    *.cbz|*.epub|*.zip) unzip "$path" ;;
+    *.cpio) cpio -id < "$path" ;;
+    *.exe) cabextract "$path" ;;
+    *.gz) gunzip "$path" ;;
+    *.lzma) unlzma "$path" ;;
+    *.xz) unxz "$path" ;;
+    *.zpaq) zpaq x "$path" ;;
+    *.z|*.Z) uncompress "$path" ;;
+    *.zlib) zlib-flate -uncompress < "$path" > "$path.tmp" && mv "$path.tmp" "${1%.*zlib}" && rm -f "$path" ;;
+    *) 
+      echo "Unknown format: '$path'" >&2
+      cd ..
+      rmdir -- "$newdir"
+      return 1
+    ;;
+  esac
+
+  extracted="$(find . -mindepth 1 -maxdepth 1 -type d)"
+  samename="./$target"
+
+  if [ "$extracted" == "$samename" ]; then
+    mv -- "$extracted"/.* "$extracted"/* . 2>/dev/null
+    rmdir -- "$extracted" 2>/dev/null
+  fi
+
+  cd ..
+}
+
+for archive in "$@"; do extract "$archive"; done

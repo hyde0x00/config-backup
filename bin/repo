@@ -1,0 +1,23 @@
+#!/bin/bash
+
+open_repo() {
+  current="$(pwd)"
+  target="$1"
+  if [ ! -d "$target" ]; then
+    echo "'$target': Not a directory" >&2
+    return 1
+  fi
+  cd "$target"
+  if git rev-parse 2>/dev/null; then
+    url="$(git config --get remote.origin.url)"
+    echo "Opening '$url'..."
+    open "$url"
+  else
+    [ "$target" == '.' ] && target="$current"
+    echo "'$target': Not a git repository" >&2
+  fi
+  cd "$current"
+}
+
+[ -z "$1" ] && set -- '.'
+for path in "$@"; do open_repo "$path"; done

@@ -1,0 +1,53 @@
+#!/bin/bash
+
+show_hidden=false
+show_preview=false
+vertical_split=false
+
+while getopts "aPV" opt; do
+  case $opt in
+    a) show_hidden=true ;;
+    P) show_preview=true ;;
+    V) vertical_split=true ;;
+    *) return 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+[ "$show_preview" != "true" ] && FZF_DEFAULT_OPTS+=" --preview-window=hidden"
+[ "$vertical_split" == "true" ] && FZF_DEFAULT_OPTS+=" --preview-window=right"
+
+[ -z "$1" ] && set -- '.'
+
+for path in "$@"; do
+  if [ ! -d "$path" ]; then
+    echo "'$path': Not a directory" >&2
+  fi
+done
+
+trim_slash() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//'
+}
+
+find_dirs() {
+  if [ "$show_hidden" == "true" ]; then
+    find -L "$1" -type d -mindepth 1
+  else
+    find -L "$1" -type d -mindepth 1 -not -path "$1/.*" -not -path "$1*/.*"
+  fi
+}
+
+sel="$(
+  for path in "$@"; do
+    find_dirs "$(trim_slash "$path")"
+  done 2>/dev/null \
+    | sed 's/^\.\///; s/$/\//' \
+      | ifne fzf --preview='tree -L 1 -F -- {} \
+        | sed "s/\/\/$/\//g; s/├── //g; s/└── //g; 1d" \
+          | head -n -2'
+)"
+
+[ -z "$sel" ] && exit 1
+
+echo "$sel"

@@ -1,0 +1,111 @@
+hi clear
+let g:colors_name = 'x'
+
+hi Normal           ctermfg=none  ctermbg=0     cterm=none
+hi Comment          ctermfg=9     ctermbg=0     cterm=none
+hi Todo             ctermfg=9     ctermbg=0     cterm=none
+hi Statement        ctermfg=11    ctermbg=0     cterm=none
+hi Constant         ctermfg=10    ctermbg=0     cterm=none
+hi Special          ctermfg=10    ctermbg=0     cterm=none
+hi NonText          ctermfg=8     ctermbg=0     cterm=none
+hi EndofBuffer      ctermfg=8     ctermbg=0     cterm=none
+hi Folded           ctermfg=8     ctermbg=0     cterm=none
+hi FoldColumn       ctermfg=8     ctermbg=0     cterm=none
+hi LineNr           ctermfg=8     ctermbg=0     cterm=none
+hi ColorColumn      ctermfg=none  ctermbg=235   cterm=none
+hi CursorLine       ctermfg=none  ctermbg=234   cterm=none
+hi CursorLineNr     ctermfg=8     ctermbg=0     cterm=none
+hi Search           ctermfg=15    ctermbg=5     cterm=none
+hi CurSearch        ctermfg=15    ctermbg=2     cterm=none
+hi IncSearch        ctermfg=15    ctermbg=2     cterm=none
+hi MatchParen       ctermfg=15    ctermbg=6     cterm=none
+hi Visual           ctermfg=none  ctermbg=4     cterm=none
+hi StatusLine       ctermfg=none  ctermbg=0     cterm=reverse
+hi StatusLineTerm   ctermfg=none  ctermbg=0     cterm=reverse
+hi StatusLineNC     ctermfg=8     ctermbg=0     cterm=reverse
+hi StatusLineTermNC ctermfg=8     ctermbg=0     cterm=reverse
+hi VertSplit        ctermfg=8     ctermbg=0     cterm=none
+hi PmenuSel         ctermfg=none  ctermbg=0     cterm=reverse
+hi PmenuThumb       ctermfg=none  ctermbg=8     cterm=none
+hi TabLine          ctermfg=none  ctermbg=0     cterm=reverse
+hi TabLineFill      ctermfg=8     ctermbg=0     cterm=reverse
+hi TabLineSel       ctermfg=15    ctermbg=0     cterm=none
+hi ErrorMsg         ctermfg=15    ctermbg=1     cterm=none
+hi SpellBad         ctermfg=9     ctermbg=0     cterm=none
+hi SpellCap         ctermfg=14    ctermbg=0     cterm=none
+hi SpellLocal       ctermfg=13    ctermbg=0     cterm=none
+hi SpellRare        ctermfg=13    ctermbg=0     cterm=none
+hi Conceal          ctermfg=8     ctermbg=0     cterm=none
+hi Invisible        ctermfg=8     ctermbg=0     cterm=none
+hi SpecialKey       ctermfg=8     ctermbg=0     cterm=none
+hi Underlined       ctermfg=none  ctermbg=0     cterm=underline
+hi DiffAdd          ctermfg=none  ctermbg=22    cterm=none
+hi DiffChange       ctermfg=none  ctermbg=22    cterm=none
+hi DiffText         ctermfg=none  ctermbg=28    cterm=none
+hi DiffDelete       ctermfg=124   ctermbg=52    cterm=none
+hi diffAdded        ctermfg=10    ctermbg=0     cterm=none
+hi diffRemoved      ctermfg=9     ctermbg=0     cterm=none
+hi diffLine         ctermfg=8     ctermbg=0     cterm=none
+
+hi! link CursorColumn Normal
+hi! link Pmenu        Normal
+hi! link PmenuSbar    Normal
+hi! link PreProc      Normal
+hi! link ModeMsg      Normal
+hi! link MoreMsg      Normal
+hi! link WarningMsg   Normal
+hi! link Directory    Normal
+hi! link Error        Normal
+hi! link Function     Normal
+hi! link Identifier   Normal
+hi! link SignColumn   Normal
+hi! link Title        Normal
+hi! link Type         Normal
+hi! link Question     Normal
+hi! link QuickFixLine Normal
+hi! link WildMenu     Normal
+
+hi! link diffChanged   Normal
+hi! link diffIndexLine Normal
+hi! link diffFile      Normal
+hi! link diffNewFile   Normal
+hi! link diffOldFile   Normal
+hi! link diffSubname   Normal
+hi! link htmlLink                    Normal
+hi! link htmlBoldItalic              Normal
+hi! link htmlBoldItalicUnderline     Normal
+hi! link htmlBold                    Normal
+hi! link htmlBoldUnderlineItalic     Normal
+hi! link htmlBoldUnderline           Normal
+hi! link htmlItalicBold              Normal
+hi! link htmlItalicBoldUnderline     Normal
+hi! link htmlItalic                  Normal
+hi! link htmlItalicUnderlineBold     Normal
+hi! link htmlItalicUnderline         Normal
+hi! link htmlUnderlineBoldItalic     Normal
+hi! link htmlUnderlineBold           Normal
+hi! link htmlUnderlineItalicBold     Normal
+hi! link htmlUnderlineItalic         Normal
+hi! link htmlUnderline               Normal
+hi! link markdownBoldDelimiter       Normal
+hi! link markdownBoldItalicDelimiter Normal
+hi! link markdownBoldItalic          Normal
+hi! link markdownBold                Normal
+hi! link markdownCodeDelimiter       Normal
+hi! link markdownItalicDelimiter     Normal
+hi! link markdownItalic              Normal
+hi! link markdownStrikeDelimiter     Normal
+hi! link markdownStrike              Normal
+
+if 0
+  " hi! WhiteSpace ctermfg=none ctermbg=9
+  " hi! WhiteSpace ctermfg=none ctermbg=124
+  hi WhiteSpace ctermfg=none ctermbg=88
+  " hi! WhiteSpace ctermfg=none ctermbg=52
+  match WhiteSpace '\s\+$'
+endif
+
+if 0
+  hi MyColorColumn ctermfg=none ctermbg=88
+  call matchadd('MyColorColumn', '\%81v')
+endif
