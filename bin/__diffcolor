@@ -1,0 +1,36 @@
+#!/bin/bash
+
+GREY="$(tput setaf 8)"
+RED="$(tput setaf 9)"
+GREEN="$(tput setaf 10)"
+RESET=$'\e[0;0m'
+
+colorize() {
+  while read -r line; do
+    case "$line" in
+      ---|[0-9]*) echo "$GREY$line$RESET" ;;
+      '<'*) echo "$RED$line$RESET" ;;
+      '>'*) echo "$GREEN$line$RESET" ;;
+      *) echo "$RESET$line$RESET" ;;
+    esac
+  done
+}
+
+while getopts "fp" opt 2>/dev/null; do
+  case "$opt" in
+    f) force_color=true; shift ;;
+    p) pager=true; shift ;;
+  esac
+done
+
+if [ $# -ne 2 ]; then
+  exit 1
+fi
+
+if [ "$pager" == "true" ]; then
+  diff "$@" | colorize | pg
+elif [ "$force_color" == "true" ] || [ -t 1 ]; then
+  diff "$@" | colorize
+else 
+  diff "$@"
+fi
