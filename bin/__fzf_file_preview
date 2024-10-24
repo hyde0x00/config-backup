@@ -1,0 +1,13 @@
+#!/bin/bash
+
+showtype() {
+  mime="$(file --mime-type --brief --dereference -- "$1")"
+  color="$(tput setaf 8 rev)"
+  pad="$((COLUMNS + ${#color}))"
+  printf "%${pad}s\n" "$color$mime"
+}
+
+case "$(file --brief --dereference -- "$1")" in 
+  *text*) cat -- "$1" ;;
+  *) showtype "$1" ;;
+esac
