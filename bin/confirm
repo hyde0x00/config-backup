@@ -1,0 +1,12 @@
+#!/bin/bash
+
+[ -z "$1" ] && msg="Confirm" || msg="$*"
+
+echo -n "${msg} [y/n] "
+read -r yn
+
+case "$(echo "$yn" | sed 's/.*/\L&/')" in 
+  y|yes) exit 0 ;;
+  n|no) exit 1 ;;
+  *) confirm "$*" ;;
+esac

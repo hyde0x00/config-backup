@@ -1,0 +1,49 @@
+#!/bin/bash
+
+show_hidden=false
+quiet=false
+
+grep_opts=()
+
+while getopts "acwn:i:q" opt; do
+  case "$opt" in
+    a) show_hidden=true ;;
+    c) grep_opts+=("--ignore-case") ;;
+    w) grep_opts+=("--word-regexp") ;;
+    n) grep_opts+=("--include=$OPTARG") ;;
+    i) grep_opts+=("--exclude=$OPTARG") ;;
+    q) quiet=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+pattern="$1"
+shift
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for path in "$@"; do
+  if [ "$quiet" != "true" ] && [ ! -e "$path" ]; then
+    echo "'$path': No such file or directory" >&2
+  fi
+done
+
+trim_slash() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//'
+}
+
+find_files() {
+  if [ "$show_hidden" == "true" ]; then
+    find -L "$1" -type f -print0 | sort
+  else
+    find -L "$1" -type f -not -path "$1/.*" -not -path "$1*/.*" -print0 | sort
+  fi
+}
+
+for path in "$@"; do
+  find_files "$(trim_slash "$path")" | xargs -0 grep -nHIs "${grep_opts[@]}" -- "$pattern"
+done 2>/dev/null | sed 's/^\.\///'

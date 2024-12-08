@@ -1,0 +1,79 @@
+#!/bin/bash
+
+action=open
+
+show_hidden=false
+show_preview=false
+vertical_split=false
+quiet=false
+
+find_names=()
+ignore_names=()
+
+find_name() {
+  if [ "${#find_names[@]}" -gt 1 ]; then
+        find_names+=("-o")
+  fi
+  find_names+=("-name" "$1")
+}
+
+ignore_name() {
+  ignore_names+=("-not" "-name" "$1")
+}
+
+while getopts "epxan:i:PVq" opt; do
+  case $opt in
+    e) action=edit ;;
+    p) action=print ;;
+    x) action=xdg_open ;;
+    a) show_hidden=true ;;
+    n) find_name "$OPTARG" ;;
+    i) ignore_name "$OPTARG" ;;
+    P) show_preview=true ;;
+    V) show_preview=true; vertical_split=true ;;
+    q) quiet=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+fzf_opts=()
+
+[ "$show_preview" == "false" ] && fzf_opts+=("--preview-window=hidden")
+[ "$vertical_split" == "true" ] && fzf_opts+=("--preview-window=right")
+
+[ -z "$1" ] && set -- '.'
+
+for path in "$@"; do
+  if [ "$quiet" != "true" ] && [ ! -e "$path" ]; then
+    echo "'$path': No such file or directory" >&2
+  fi
+done
+
+trim_slash() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//'
+}
+
+find_files() {
+  if [ "$show_hidden" == "true" ]; then
+    find -L "$1" -type f "${find_names[@]}" "${ignore_names[@]}" | sort
+  else
+    find -L "$1" -type f "${find_names[@]}" "${ignore_names[@]}" -not -path "$1/.*" -not -path "$1*/.*" | sort
+  fi
+}
+
+sel="$(
+  for path in "$@"; do
+    find_files "$(trim_slash "$path")"
+  done 2>/dev/null | sed 's/^\.\///' | ifne fzf "${fzf_opts[@]}" --preview='__fzf_file_preview {}'
+)"
+
+[ -z "$sel" ] && exit 1
+
+case "$action" in
+  open) open "$sel" ;;
+  edit) $EDITOR "$sel" ;;
+  print) echo "$sel" ;;
+  xdg_open) xdg-open "$sel" ;;
+esac

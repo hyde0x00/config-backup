@@ -1,0 +1,1 @@
+" syn match cHash display "^\s*\(%:\|#\)\s*\(include\|define\|defined\|ifdef\|ifndef\|elif\|else\|endif\|undef\|error\|import\|line\|pragma\|using\|if\)\>" containedin=cInclude,cPreCondit,cPreConditMatch contains=cCppInWrapper,cCppOutWrapper

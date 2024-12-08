@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# https://github.com/void-linux/void-runit/blob/master/zzz
+
+systemctl suspend -i
+
+printf "Zzzz... "

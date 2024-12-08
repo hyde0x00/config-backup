@@ -1,0 +1,13 @@
+#!/bin/bash
+
+sel="$(man -k "${1:-.}" 2>/dev/null | ifne fzf)"
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+IFS=' ' read -r manpage section description <<< "$sel"
+
+section="$(echo "$section" | tr -d '()')"
+
+man "$section" "$manpage" 2>/dev/null

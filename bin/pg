@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "h noaction
+, prev-file
+. next-file" > "$HOME/.lesskey"
+
+if [ -t 0 ] && [ -z "$1" ]; then 
+  echo "Missing filename"
+  exit 1
+fi
+
+less "$@"

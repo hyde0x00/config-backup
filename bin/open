@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+  echo "$(basename "$0") <file|url>"
+  exit 1
+fi
+
+case "$(file --brief --dereference -- "$1")" in 
+  empty|*text*) $EDITOR "$1" ;;
+  *) xdg-open "$1" ;;
+esac
