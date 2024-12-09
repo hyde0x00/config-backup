@@ -1,0 +1,17 @@
+#!/bin/bash
+
+IFS=':' read -r file line text <<< "$*"
+
+start_line=$((line - (LINES / 2)))
+end_line=$((start_line + LINES - 1))
+
+while [ "$start_line" -lt 1 ]; do
+  offset="$offset\n"
+  start_line=$((start_line+1))
+done
+
+result="$(sed --quiet -- "$start_line,$((end_line))"p "$file")"
+
+printf "$offset"
+echo "$result" | head -n -1
+echo "$result" | tail -n 1 | expand | cut -c 1-"$((COLUMNS-1))" # cut last char

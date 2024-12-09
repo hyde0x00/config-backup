@@ -1,0 +1,17 @@
+#!/bin/bash
+
+while getopts "t" opt; do
+  case "$opt" in
+    t) title=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+capitalize() {
+  sed "s/\b\(.\)/\u\1/g; s/'S/'s/g"
+}
+
+if [ ! -t 0 ]; then capitalize; fi
+if [ -n "$1" ]; then echo "$*" | capitalize; fi
