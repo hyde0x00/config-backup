@@ -1,0 +1,91 @@
+#!/bin/bash
+
+action=open
+
+show_hidden=false
+show_preview=false
+vertical_split=false
+quiet=false
+
+ignored_dirs_or_names=()
+searched_for_names=()
+
+while getopts "ai:n:PVepxq" opt; do
+  case $opt in
+    a) show_hidden=true ;;
+    i) ignored_dirs_or_names+=("$OPTARG") ;;
+    n) searched_for_names+=("$OPTARG") ;;
+    P) show_preview=true ;;
+    V) show_preview=true && vertical_split=true ;;
+    e) action=edit ;;
+    p) action=print ;;
+    x) action=xdg_open ;;
+    q) quiet=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+fzf_opts=()
+
+[ "$show_preview" == "false" ] && fzf_opts+=("--preview-window=hidden")
+[ "$vertical_split" == "true" ] && fzf_opts+=("--preview-window=right")
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for path in "$@"; do
+  if [ "$quiet" != "true" ] && [ ! -e "$path" ]; then
+    echo "'$path': No such file or directory" >&2
+  fi
+done
+
+trim_slash() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//'
+}
+
+get_find_opts() {
+  for x in "${ignored_dirs_or_names[@]}"; do
+    if [ "${x:0-1}" == "/" ]; then
+      not_dirs+=("-not" "-path" "$1/$(trim_slash "$x")*")
+    else
+      not_names+=("-not" "-name" "$x")
+    fi
+  done
+  for x in "${searched_for_names[@]}"; do
+    if [ -z "${names[@]}" ]; then
+      names+=("-name" "$x")
+    else
+      names+=("-o" "-name" "$x")
+    fi
+  done
+  find_opts=("${not_dirs[@]}" "${not_names[@]}" "${names[@]}")
+}
+
+get_filenames() {
+  get_find_opts "$1"
+  if [ "$show_hidden" == "true" ]; then
+    find -L "$1" -type f "${find_opts[@]}" | sort
+  else
+    find -L "$1" -type f "${find_opts[@]}" -not -path "$1/.*" -not -path "$1*/.*" | sort
+  fi
+}
+
+sel="$(
+  for path in "$@"; do
+    get_filenames "$(trim_slash "$path")"
+  done 2>/dev/null | sed 's/^\.\///' | ifne fzf "${fzf_opts[@]}" --preview='__fzf_file_preview {}'
+)"
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+case "$action" in
+  open) open "$sel" ;;
+  edit) $EDITOR "$sel" ;;
+  print) echo "$sel" ;;
+  xdg_open) xdg-open "$sel" ;;
+esac
