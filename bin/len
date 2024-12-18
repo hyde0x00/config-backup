@@ -1,0 +1,10 @@
+#!/bin/bash
+
+print_len() {
+  while IFS=$'\n' read -r line; do
+    echo "${#line}"
+  done
+}
+
+if [ ! -t 0 ]; then printlen; fi
+if [ -n "$1" ]; then echo "$*" | printlen; fi

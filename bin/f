@@ -1,0 +1,88 @@
+#!/bin/bash
+
+action=open
+
+show_hidden=false
+fzf_show_preview=false
+fzf_vertical_split=false
+quiet=false
+
+ignore_patterns=()
+find_names=()
+
+while getopts "ai:n:PVepxq" opt; do
+  case "$opt" in
+    a) show_hidden=true ;;
+    i) ignore_patterns+=("$OPTARG");;
+    n) find_names+=("$OPTARG");;
+    P) fzf_show_preview=true ;;
+    V) fzf_show_preview=true && fzf_vertical_split=true ;;
+    e) action=edit ;;
+    p) action=print ;;
+    x) action=xdg_open ;;
+    q) quiet=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+fzf_options=()
+
+[ "$fzf_show_preview" == "false" ] && fzf_options+=("--preview-window=hidden")
+[ "$fzf_vertical_split" == "true" ] && fzf_options+=("--preview-window=right")
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for path in "$@"; do
+  if [ "$quiet" != "true" ] && [ ! -e "$path" ]; then
+    echo "'$path': No such file or directory" >&2
+  fi
+done
+
+trim_slash() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//'
+}
+
+get_filenames() {
+  readarray -t ignored < <(__get_ignored_files "${ignore_patterns[@]}") 
+
+  for n in "${find_names[@]}"; do
+    if [ -z "${names[@]}" ]; then
+      names+=("-name" "$n")
+    else
+      names+=("-o" "-name" "$n")
+    fi
+  done
+
+  if [ "$show_hidden" != "true" ]; then
+    readarray -t found < <(find "$1" -type f "${names[@]}" -not -path "$1/.*" -not -path "$1*/.*" | sed 's/^\.\///')
+  else
+    readarray -t found < <(find "$1" -type f "${names[@]}" | sed 's/^\.\///')
+  fi
+
+  for file in "${found[@]}"; do
+    if [[ ! "${ignored[@]}" =~ "$file" ]]; then
+      echo "$file"
+    fi
+  done
+}
+
+sel="$(
+  for path in "$@"; do
+    get_filenames "$(trim_slash "$path")" | sort
+  done 2>/dev/null | ifne fzf "${fzf_options[@]}" --preview='__fzf_file_preview {}'
+)"
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+case "$action" in
+  open) open "$sel" ;;
+  edit) $EDITOR "$sel" ;;
+  print) echo "$sel" ;;
+  xdg_open) xdg-open "$sel" ;;
+esac

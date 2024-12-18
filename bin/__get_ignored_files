@@ -1,0 +1,45 @@
+#!/bin/bash
+
+prj=".project"
+
+ignore_patterns+=("$@")
+
+if [ -f "$prj" ]; then
+  . "$prj"
+  ignore_patterns+=("${ignore[@]}")
+fi
+
+shopt -s globstar
+
+for p in "${ignore_patterns[@]}"; do
+  is_dir=false
+  recursive=false
+
+  if [[ "$p" =~ ^"/" ]]; then
+    p="${p:1}"
+  else
+    p="**/$p"
+  fi
+  if [[ "$p" =~ "/*"$ ]] ; then
+    is_dir=true; recursive=false
+    p="${p:0:-1}"
+  fi
+  if [[ "$p" =~ "/**"$ ]]; then
+    is_dir=true; recursive=true
+    p="${p:0:-1}"
+  fi
+  if [[ "$p" =~ "/"$ ]]; then
+    is_dir=true; recursive=true
+    p="$p*"
+  fi
+
+  if [ "$is_dir" == "true" ]; then
+    if [ "$recursive" == "true" ]; then
+      find $p -type f
+    else
+      find $p -maxdepth 1 -type f
+    fi
+  else
+    find $p -maxdepth 0 -type f
+  fi
+done

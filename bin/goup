@@ -1,0 +1,7 @@
+#!/bin/sh
+
+while [ "$PWD" != '/' ]; do
+  echo "$PWD"
+  cd ..
+done
+

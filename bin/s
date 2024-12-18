@@ -1,0 +1,101 @@
+#!/bin/bash
+
+show_hidden=false
+fzf_exact_match=false
+fzf_match_filenames=false
+fzf_show_preview=false
+fzf_vertical_split=false
+quiet=false
+
+ignored_dirs_or_files=()
+searched_for_names=()
+
+grep_options=("-nHIs")
+
+while getopts "ai:n:efpcwPVq" opt; do
+  case "$opt" in
+    a) show_hidden=true ;;
+    i) ignored_dirs_or_files+=("$OPTARG") ;;
+    n) searched_for_names+=("$OPTARG") ;;
+    e) fzf_exact_match=true ;;
+    f) fzf_match_filenames=true ;;
+    p) print_result=true ;;
+    c) grep_options+=("--ignore-case") ;;
+    w) grep_options+=("--word-regexp") ;;
+    P) fzf_show_preview=true ;;
+    V) fzf_show_preview=true && fzf_vertical_split=true ;;
+    q) quiet=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+fzf_options=()
+
+[ "$fzf_show_preview" == "false" ] && fzf_options+=("--preview-window=hidden")
+[ "$fzf_vertical_split" == "true" ] && fzf_options+=("--preview-window=right")
+[ "$fzf_exact_match" == "true" ] && fzf_options+=("--exact")
+[ "$fzf_match_filenames" == "false" ] && fzf_options+=("-d" ":" "-n" "3..")
+
+pattern="$1"
+shift
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for path in "$@"; do
+  if [ "$quiet" != "true" ] && [ ! -e "$path" ]; then
+    echo "'$path': No such file or directory" >&2
+  fi
+done
+
+trim_slash() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//'
+}
+
+get_find_options() {
+  for x in "${ignored_dirs_or_paths[@]}"; do
+    if [[ "$x" =~ /$ ]]; then
+      not_paths+=("-not" "-path" "$1/$x*")
+    else
+      not_paths+=("-not" "-path" "$x")
+    fi
+  done
+  for n in "${searched_for_names[@]}"; do
+    if [ -z "${names[@]}" ]; then
+      names+=("-name" "$n")
+    else
+      names+=("-o" "-name" "$n")
+    fi
+  done
+  find_options=("${names[@]}" "${not_paths[@]}")
+}
+
+get_filenames() {
+  get_find_options "$1"
+  if [ "$show_hidden" != "true" ]; then
+    find "$1" -type f "${find_options[@]}" -not -path "$1/.*" -not -path "$1*/.*" -print0
+  else
+    find "$1" -type f "${find_options[@]}" -print0
+  fi
+}
+
+sel="$(
+  for path in "$@"; do
+    get_filenames "$(trim_slash "$path")" | sort | xargs -0 grep "${grep_options[@]}" -- "$pattern"
+  done 2>/dev/null | sed 's/^\.\///' | ifne fzf "${fzf_options[@]}" --preview='__fzf_search_preview {}'
+)"
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+IFS=':' read -r file line text <<< "$sel"
+
+if [ "$print_result" != "true" ]; then
+  $EDITOR +"$line" "$file"
+else
+  echo "$sel"
+fi

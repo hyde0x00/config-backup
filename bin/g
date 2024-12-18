@@ -1,0 +1,71 @@
+#!/bin/bash
+
+show_hidden=false
+quiet=false
+
+grep_options=("-nHIs")
+
+ignored_dirs_or_paths=()
+searched_for_names=()
+
+while getopts "ai:n:cwq" opt; do
+  case "$opt" in
+    a) show_hidden=true ;;
+    i) ignored_dirs_or_paths+=("$OPTARG") ;;
+    n) searched_for_names+=("$OPTARG") ;;
+    c) grep_options+=("--ignore-case") ;;
+    w) grep_options+=("--word-regexp") ;;
+    q) quiet=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+pattern="$1"
+shift
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for path in "$@"; do
+  if [ "$quiet" != "true" ] && [ ! -e "$path" ]; then
+    echo "'$path': No such file or directory" >&2
+  fi
+done
+
+trim_slash() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//; s/^$/\//'
+}
+
+get_find_options() {
+  for x in "${ignored_dirs_or_paths[@]}"; do
+    if [[ "$x" =~ /$ ]]; then
+      not_paths+=("-not" "-path" "$1/$x*")
+    else
+      not_paths+=("-not" "-path" "$x")
+    fi
+  done
+  for n in "${searched_for_names[@]}"; do
+    if [ -z "${names[@]}" ]; then
+      names+=("-name" "$n")
+    else
+      names+=("-o" "-name" "$n")
+    fi
+  done
+  find_options=("${names[@]}" "${not_paths[@]}")
+}
+
+get_filenames() {
+  get_find_options "$1"
+  if [ "$show_hidden" != "true" ]; then
+    find "$1" -type f "${find_options[@]}" -not -path "$1/.*" -not -path "$1*/.*" -print0
+  else
+    find "$1" -type f "${find_options[@]}" -print0
+  fi
+}
+
+for path in "$@"; do
+  get_filenames "$(trim_slash "$path")" | sort | xargs -0 grep "${grep_options[@]}" -- "$pattern"
+done 2>/dev/null | sed 's/^\.\///'
