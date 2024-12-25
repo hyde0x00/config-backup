@@ -1,0 +1,21 @@
+#!/bin/bash
+
+while getopts "r" opt; do
+   case "$opt" in
+     r) keep_last=true ;;
+     *) exit 1 ;;
+   esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+unique() {
+  if [ "$keep_last" = true ]; then 
+    tac | awk '/^\s*$/ { print; next; }; !seen[$0]++' | tac
+  else
+    awk '/^\s*$/ { print; next; }; !seen[$0]++'
+  fi
+}
+
+if [ ! -t 0 ]; then unique; fi
+if [ -n "$1" ]; then cat "$@" | unique; fi

@@ -1,0 +1,54 @@
+#!/bin/bash
+
+grep_options=(-nHIs)
+
+quiet=false
+
+while getopts "an:cwq" opt; do
+  case "$opt" in
+    a) find_show_hidden=true ;;
+    n) find_name_pattern="$OPTARG" ;;
+    c) grep_options+=("--ignore-case") ;;
+    w) grep_options+=("--word-regexp") ;;
+    q) quiet=true ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+trim_slashes() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//g; s/^$/\//g'
+}
+
+find_files() {
+  for search_path; do
+    if [ ! -d "$search_path" ]; then
+      if [ "$quiet" != true ]; then
+        echo "Search path is not a directory: '$search_path'" >&2
+      fi
+      continue
+    fi
+
+    p="$(trim_slashes "$search_path")"
+
+    if [ "$find_show_hidden" != true ]; then
+      options+=(-not -path "$p/.*" -not -path "$p*/.*")
+    fi
+
+    if [ -n "$find_name_pattern" ]; then
+      options+=(-name "$find_name_pattern")
+    fi
+
+    find -L "$p" "${options[@]}" -type f -print0 2>/dev/null
+  done
+}
+
+pattern="$1"
+shift
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+find_files "$@" \
+  | xargs -0 grep "${grep_options[@]}" -- "$pattern" 2>/dev/null | sed 's/\.\///'
