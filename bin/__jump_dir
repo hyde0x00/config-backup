@@ -1,0 +1,60 @@
+#!/bin/bash
+
+while getopts "an:PVq" opt; do
+  case "$opt" in
+    a) show_hidden=true ;;
+    n) name_pattern="$OPTARG" ;;
+    P) preview_show=true ;;
+    V) preview_show=true && preview_vertical=true ;;
+    q) quiet=true ;;
+    *) return 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+fzf_cmd=(fzf --preview="__fzf_directory_preview {}")
+
+[ "$preview_show" != true ] && fzf_cmd+=(--preview-window=hidden)
+[ "$preview_vertical" == true ] && fzf_cmd+=(--preview-window=right)
+
+trim_slashes() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//g; s/^$/\//g'
+}
+
+find_directories() {
+  for path; do
+    p="$(trim_slashes "$path")"
+
+    if [ "$show_hidden" != true ]; then
+      options+=(-not \( -path "$p/.*" -prune \) -not \( -path "$p*/.*" -prune \))
+    fi
+    if [ -n "$name_pattern" ]; then
+      options+=(-name "$name_pattern")
+    fi
+
+    find -L "$p" "${options[@]}" -mindepth 1 -type d 2>/dev/null
+  done
+}
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for search_path; do
+  if [ -d "$search_path" ]; then
+    paths+=("$search_path")
+  elif [ "$quiet" != true ]; then
+    echo "Not a directory: '$search_path'" >&2
+  fi
+done
+
+sel="$(
+  find_directories "${paths[@]}" | sed 's/^\.\///; s/$/\//' | ifne "${fzf_cmd[@]}"
+)"
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+echo "$sel"

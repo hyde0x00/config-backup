@@ -1,0 +1,52 @@
+#!/bin/bash
+
+grep_options=(-nHIs)
+
+while getopts "cwan:q" opt; do
+  case "$opt" in
+    c) grep_options+=("--ignore-case") ;;
+    w) grep_options+=("--word-regexp") ;;
+    a) show_hidden=true ;;
+    n) name_pattern="$OPTARG" ;;
+    q) quiet=true ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+trim_slashes() {
+  echo "$1" | sed 's/\/\+/\//g; s/\/$//g; s/^$/\//g'
+}
+
+find_files() {
+  for path; do
+    p="$(trim_slashes "$path")"
+
+    if [ "$show_hidden" != true ]; then
+      options+=(-not \( -path "$p/.*" -prune \) -not \( -path "$p*/.*" -prune \))
+    fi
+    if [ -n "$name_pattern" ]; then
+      options+=(-name "$name_pattern")
+    fi
+
+    find -L "$p" "${options[@]}" -type f -print0 2>/dev/null
+  done
+}
+
+pattern="$1"
+shift
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for search_path; do
+  if [ -d "$search_path" ]; then
+    paths+=("$search_path")
+  elif [ "$quiet" != true ]; then
+    echo "Not a directory: '$search_path'" >&2
+  fi
+done
+
+find_files "${paths[@]}" \
+  | xargs -0 grep "${grep_options[@]}" -- "$pattern" 2>/dev/null | sed 's/\.\///'

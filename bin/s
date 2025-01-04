@@ -1,0 +1,34 @@
+#!/bin/bash
+
+while getopts "efpPV" opt; do
+  case "$opt" in
+    e) match_exact=true; shift ;;
+    f) match_filenames=true; shift ;;
+    p) print_result=true; shift ;;
+    P) preview_show=true; shift ;;
+    V) preview_show=true && fzf_preview_vertical=true; shift ;;
+  esac
+done 2>/dev/null
+
+fzf_cmd=(fzf --ansi --preview='__fzf_line_preview {}')
+
+[ "$match_exact" == true ] && fzf_cmd+=(--exact)
+[ "$match_filenames" != true ] && fzf_cmd+=(-d : -n 3..)
+[ "$preview_show" != true ] && fzf_cmd+=(--preview-window=hidden)
+[ "$preview_vertical" == true ] && fzf_cmd+=(--preview-window=right)
+
+sel="$(
+  g "$@" | ifne "${fzf_cmd[@]}"
+)"
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+IFS=':' read -r file line text <<< "$sel"
+
+if [ "$print_result" != true ]; then
+  $EDITOR +"$line" "$file"
+else
+  echo "$sel"
+fi

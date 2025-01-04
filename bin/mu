@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ -z "$MUSIC_DIR" ]; then
+  echo "MUSIC_DIR not set"
+  exit 1
+fi
+if [ ! -d "$MUSIC_DIR" ]; then
+  echo "Directory not found: $MUSIC_DIR"
+  exit 1
+fi
+
+dir="${MUSIC_DIR//\//\\/}\/"
+sel="$(find -L "$MUSIC_DIR" -type f | sed "s/$dir//" | sort -V | fzf -m)"
+
+if [ -z "$sel" ]; then
+  exit 1
+fi
+
+IFS=$'\n' 
+for s in $sel; do
+  selected+=("${s/#/$MUSIC_DIR/}")
+done
+
+mpv "${selected[@]}"

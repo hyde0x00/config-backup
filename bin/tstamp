@@ -1,0 +1,23 @@
+#!/bin/bash
+
+while getopts "uh" opt; do
+  case "$opt" in
+    u) universal=true ;;
+    h) human_readable=true ;;
+    *) exit 1 ;;
+  esac
+done 2>/dev/null
+
+shift $((OPTIND-1))
+
+if [ "$human_readable" == true ]; then
+  format="%b %d %H:%M:%S"
+else
+  format="%Y%m%d%H%M%S"
+fi
+
+if [ "$universal" == true ]; then
+  date -u +"$format"
+else
+  date +"$format"
+fi
