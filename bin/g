@@ -1,0 +1,25 @@
+#!/bin/bash
+
+grep_options=(-nHIs)
+
+while getopts ":ar0d:n:t:cCw" opt; do
+  case "$opt" in
+    a|r|0) flags+=("-$opt") ;;
+    d|n) flags+=("-$opt" "$OPTARG") ;;
+    c) grep_options+=("--ignore-case") ;;
+    C) grep_options+=("--no-ignore-case") ;;
+    w) grep_options+=("--word-regexp") ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+pattern="$1"
+shift
+
+fd "${flags[@]}" -t f -q -0 "$@" \
+  | xargs -0 grep "${grep_options[@]}" -- "$pattern" 2>/dev/null

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+while getopts "z" opt; do
+  case "$opt" in
+    z) zero_offset=true ;;
+    *) exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ "$zero_offset" == true ]; then
+    date --universal +%Y%m%d%H%M%S
+else
+    date +%Y%m%d%H%M%S
+fi

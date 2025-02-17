@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# https://manual.calibre-ebook.com/generated/en/ebook-convert.html
+
+book2pdf() {
+  if [ ! -f "$1" ]; then 
+    printf "File not found: '%s'\n" "$1" >&2
+    return 1
+  fi
+
+  base="${1##*/}"
+  name="${base%\.*}"
+  ext="${base##*\.}"
+
+  case "$ext" in 
+    azw4|chm|comic|djvu|docx|epub|fb2|htlz|html|lit|lrf|mobi|odt|pdb|pml|rb|rtf|recipe|snb|tcr|txt) 
+      ebook-convert "$1" "$name".pdf --enable-heuristics
+      ;;
+    doc) 
+      unoconv -f pdf "$1"
+      ;;
+    *) 
+      printf "Unknown extension: '%s'\n" "$ext" >&2
+      return 1
+      ;;
+  esac
+}
+
+for book; do 
+  book2pdf "$book"
+done
