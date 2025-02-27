@@ -1,0 +1,8 @@
+#!/bin/bash
+
+lowercase() {
+  sed 's/.*/\L&/g'
+}
+
+if [ ! -t 0 ]; then lowercase; fi
+if [ -n "$1" ]; then printf "%s\n" "$*" | lowercase; fi

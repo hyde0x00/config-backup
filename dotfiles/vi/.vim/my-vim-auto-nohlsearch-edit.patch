@@ -1,0 +1,23 @@
+diff --git a/plugin/auto-nohlsearch.vim b/plugin/auto-nohlsearch.vim
+index 21b36d9..6229541 100644
+--- a/plugin/auto-nohlsearch.vim
++++ b/plugin/auto-nohlsearch.vim
+@@ -36,8 +36,10 @@ function! s:handle_cursor_moved()
+         let pos_of_next_match = searchpos(last_search, "cnz", cursor_pos[0])
+         if cursor_pos != pos_of_next_match
+             call <SID>set_hlsearch(v:false)
++        else
++            redraw! "Update CurSearch position
+         endif
+-  endif
++    endif
+ endfunction
+ 
+ function! s:handle_cmdline_leave()
+@@ -89,6 +91,3 @@ noremap <silent> * *<CMD>call <SID>set_hlsearch(v:true)<CR>
+ noremap <silent> # #<CMD>call <SID>set_hlsearch(v:true)<CR>
+ noremap <silent> g* g*<CMD>call <SID>set_hlsearch(v:true)<CR>
+ noremap <silent> g# g#<CMD>call <SID>set_hlsearch(v:true)<CR>
+-noremap <silent> gd gd<CMD>call <SID>set_hlsearch(v:true)<CR>
+-noremap <silent> gD gD<CMD>call <SID>set_hlsearch(v:true)<CR>
+-
