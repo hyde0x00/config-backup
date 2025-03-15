@@ -1,0 +1,24 @@
+"
+" https://stackoverflow.com/questions/6453595/prevent-vim-from-clearing-the-clipboard-on-exit
+"
+function! PreserveClipboard()
+  call system('xsel --input --clipboard', getreg('+'))
+endfunction
+
+function! PreserveClipboadAndSuspend()
+  call PreserveClipboard()
+  suspend
+endfunction
+  
+function! EnablePreserveClipboard()
+  if !executable('xsel')
+    echo '[EnablePreserveClipboard] Executable not found: xsel'
+    return -1
+  endif
+
+  autocmd VimLeave * call PreserveClipboard()
+  nnoremap <silent> <C-Z> :call PreserveClipboadAndSuspend()<CR>
+  vnoremap <silent> <C-Z> :<C-U>call PreserveClipboadAndSuspend()<CR>
+endfunction 
+
+call EnablePreserveClipboard()
