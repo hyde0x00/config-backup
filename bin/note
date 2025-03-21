@@ -1,0 +1,66 @@
+#!/bin/bash
+
+if [ -z "$NOTES_DIR" ]; then
+  printf "NOTES_DIR not set\n" >&2
+  exit 1
+fi
+
+if [ ! -d "$NOTES_DIR" ]; then
+  mkdir -p "$NOTES_DIR"
+fi
+
+cleanup() {
+  find "$NOTES_DIR" -empty -delete
+}
+
+create_note() {
+  printf "New note: "
+  read -r name
+
+  if [ -z "$name" ]; then
+    return 1
+  fi
+
+  new_note="${NOTES_DIR}/${name}"
+
+  if [ -f "$new_note" ]; then
+    printf "'%s' already exists, try another name\n" "$new_note"
+    return 1
+  fi
+
+  maybe_new_dir="$(dirname "$new_note")"
+  mkdir -p "$maybe_new_dir" 2>/dev/null
+
+  $EDITOR "$new_note"
+  cleanup
+}
+
+show_tree() {
+  tree -F "$NOTES_DIR"
+}
+
+edit_notes_dir() {
+  cd "$NOTES_DIR" || exit 1
+  find . -type f | vidir -
+  cleanup
+}
+
+while getopts ":nte" opt; do
+   case "$opt" in
+     n) create_note && exit 0 ;;
+     t) show_tree && exit 0 ;;
+     e) edit_notes_dir && exit 0 ;;
+  esac
+done
+
+current_dir="$PWD"
+cd "$NOTES_DIR" || exit 1
+
+if [ -z "$1" ]; then
+  f .
+else
+  s "$@" .
+fi
+
+cd "$current_dir"
+cleanup

@@ -1,0 +1,6 @@
+set -o vi
+
+_s="$( if (( USER_ID )); then print \$; else print \#; fi)"
+PS1=$'\1\r\1\e[1;37m\1$_s\1\e[0m\1 '
+
+bind ^L=clear-screen
