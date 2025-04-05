@@ -1,0 +1,74 @@
+#!/bin/bash
+
+while getopts ":ard:n:t:0q" opt; do
+  case "$opt" in
+    a) show_hidden=true ;;
+    r) absolute_path=true ;;
+    d) depth="$OPTARG" ;;
+    n) name="$OPTARG" ;;
+    t) type="$OPTARG" ;;
+    0) null_terminated=true ;;
+    q) quiet=true ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+trim_slashes() {
+  if [[ $1 =~ / ]]; then
+    printf "%s\n" "$1" | sed 's/\/\+/\//g; s/\/$//g; s/^$/\//g'
+  else
+    printf "%s\n" "$1"
+  fi
+}
+
+cut_dotslash() {
+  if [ "$null_terminated" == true ]; then
+    sed -z 's/^\.\///'
+  else
+    sed 's/^\.\///'
+  fi
+}
+
+find_with_options() {
+  local -a options paths 
+
+  [ -n "$depth" ] && options+=(-maxdepth "$depth")
+
+  for path; do
+    if [ "$absolute_path" == true ]; then
+      p="$(realpath "$path")"
+    else
+      p="$(trim_slashes "$path")"
+    fi
+
+    paths+=("$p")
+
+    [ -d "$p" ] && options+=(-not -path "$p")
+
+    if [ "$show_hidden" != true ] && [ -d "$p" ]; then
+      options+=(-not \( -path "$p/.*" -prune -or -path "$p*/.*" -prune \))
+    fi
+  done
+
+  [ -n "$name" ] && options+=(-name "$name")
+  [ -n "$type" ] && options+=(-type "$type")
+
+  if [ "$null_terminated" == true ]; then
+    options+=(\( -type d -printf '%p/\0' -or -print0 \))
+  else
+    options+=(\( -type d -printf '%p/\n' -or -print \))
+  fi
+
+  find -L "${paths[@]}" "${options[@]}" | cut_dotslash | ifne -n false
+} 
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+if [ "$quiet" == true ]; then 
+  find_with_options "$@" 2>/dev/null
+else
+  find_with_options "$@"
+fi

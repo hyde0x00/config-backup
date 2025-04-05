@@ -1,0 +1,80 @@
+#!/bin/bash
+
+GREY=$'\e[90m'
+REVERSE=$'\e[7m'
+RESET=$'\e[0;0m'
+
+show_message() {
+
+  color="$GREY$REVERSE"
+  padlen="$((COLUMNS + ${#color}))"
+
+  message="$1"
+  
+  printf "%*s%b\n" "$padlen" "$color$message" "$RESET"
+}
+
+if_empty_show_message() {
+  read -r line
+  if [ -z "$line" ]; then
+    show_message "$1"
+  else
+    (printf "%s\n" "$line"; cat)
+  fi
+}
+
+preview_file() {
+  type="$(file --brief --dereference -- "$1")"
+  
+  case "$type" in 
+    *text*) 
+      cat -- "$1"
+      ;;
+    *) 
+      mimetype="$(file --mime-type --brief --dereference -- "$1")"
+      show_message "$mimetype"
+      ;;
+  esac
+}
+
+preview_line() {
+  IFS=':' read -r file line text <<< "$*"
+  
+  start=$((line - (LINES / 2)))
+  end=$((start + LINES - 1))
+  
+  while [ "$start" -lt 1 ]; do
+    off="$off\n"
+    ((start++))
+  done
+
+  res="$(sed --quiet -- "$start","$end"p "$file" | expand)"
+
+  printf "%b%s\n" "$off" "$res" | sed '$s/^\(.\{'$((COLUMNS-1))'\}\).*$/\1/'
+}
+
+preview_directory() {
+  while getopts ":a" opt; do
+    case "$opt" in
+      a) show_hidden=true ;; 
+    esac
+  done
+  
+  shift $((OPTIND-1))
+  
+  options+=(-mindepth 1 -maxdepth 1)
+  [ "$show_hidden" != true ] && options+=(-not -name '.*') 
+  options+=(\( -type d -printf '%f/\n' -or -printf '%f\n' \))
+  
+  find -L "$1" "${options[@]}" | if_empty_show_message "Empty directory"
+}
+
+preview_type="$1"
+shift 
+
+case "$preview_type" in
+  file) preview_file "$@" ;;
+  line) preview_line "$@" ;;
+  directory) preview_directory "$@" ;;
+  *) printf "Unknown preview type: '%s'\n" "$preview_type"; exit 1 ;;
+esac

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  message="Confirm"
+else
+  message="$*"
+fi
+
+printf "%s [y/n] " "$message"
+read -r yn
+
+case "$(printf "%s" "$yn" | lowercase)" in 
+  y|yes) exit 0 ;;
+  n|no) exit 1 ;;
+  *) confirm "$*" ;;
+esac

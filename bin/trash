@@ -1,0 +1,69 @@
+#!/bin/bash
+
+TRASH_DIR="$HOME/.local/share/Trash/files"
+
+have_files() {
+  count="$(find "$TRASH_DIR" -mindepth 1 -maxdepth 1 | wc -l)"
+  if [ "$count" -eq 0 ]; then
+    return 1
+  fi
+}
+
+list_files() {
+  if ! have_files; then
+    printf "Trash is empty\n" >&2
+    return 1
+  fi
+
+  content="$(tree -L 1 -F "$TRASH_DIR" \
+    | sed 's/\/\/$/\//g; s/├── //g; s/└── //g; s/^\s\+//g; 1d' \
+    | head -n -2
+  )"
+
+  printf "%s\n" "$content"
+}
+
+show_tree() {
+  if have_files; then
+    tree -F "$TRASH_DIR" | head -n -2
+    exit 0
+  fi
+}
+
+move_to_trash() {
+  if [ ! -e "$1" ]; then
+    printf "No such file or directory: '%s'\n" "$1" >&2
+    return 1
+  fi
+
+  err="$(gio trash "$1" 2>&1 >/dev/null)"
+  if [ $? -ne 0 ]; then
+    printf "%s\n" "$err" >&2
+    return 1
+  fi
+
+  printf "Moved '%s' to trash\n" "$1"
+}
+
+empty_trash() {
+  if have_files && confirm "Empty trash?"; then
+    gio trash --empty
+  fi
+}
+
+while getopts ":et" opt; do
+   case "$opt" in
+     e) empty_trash ;;
+     t) show_tree ;;
+     *) exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ -z "$1" ]; then
+    list_files
+    exit 0
+fi
+
+for file; do move_to_trash "$file"; done

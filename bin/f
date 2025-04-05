@@ -1,0 +1,43 @@
+#!/bin/bash
+
+action=open
+
+while getopts ":ar0d:n:t:epxPV" opt; do
+  case "$opt" in
+    a|r|0) flags+=("-$opt") ;;
+    d|n) flags+=("-$opt" "$OPTARG") ;;
+    e) action=edit ;;
+    p) action=print ;;
+    x) action=xdg_open ;;
+    P) preview_show=true ;;
+    V) preview_show=true; preview_vertical=true ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+fzf=(fzf --preview='__fzf_preview file {}')
+
+[ "$preview_show" != true ] && fzf+=(--preview-window=hidden)
+[ "$preview_vertical" == true ] && fzf+=(--preview-window=right)
+
+select_if_not_empty() {
+  read -r line
+  if [ -n "$line" ]; then
+    (printf "%s\n" "$line"; cat) | "${fzf[@]}"
+  else
+    printf "__NOTHING_FOUND__\n"
+  fi
+}
+
+result="$(fd "${flags[@]}" -t f -q "$@" | select_if_not_empty)"
+
+[ "$result" == __NOTHING_FOUND__ ] && exit 1
+[ "$result" == "" ] && exit 2
+
+case "$action" in
+  open) open "$result" ;;
+  edit) $EDITOR "$result" ;;
+  print) printf "%s\n" "$result" ;;
+  xdg_open) xdg-open "$result" ;;
+esac
