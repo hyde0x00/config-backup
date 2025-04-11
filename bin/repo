@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# https://stackoverflow.com/questions/2180270/check-if-current-directory-is-a-git-repository
+is_repo_dir() {
+  git rev-parse 2>/dev/null
+}
+
+open_repo() {
+  target="$1"
+  current="$(pwd)"
+  if [ ! -d "$target" ]; then
+    printf "Not a directory: '%s'\n" "$target" >&2
+    return 1
+  fi
+  cd "$target"
+  if is_repo_dir; then
+    url="$(git config --get remote.origin.url)"
+    printf "Opening '%s'...\n" "$url"
+    open "$url"
+  else
+    if [ "$target" == '.' ]; then
+      target="$current"
+    fi
+    printf "Not a git repository: '%s'\n" "$target" >&2
+  fi
+  cd "$current"
+}
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+for path; do open_repo "$path"; done

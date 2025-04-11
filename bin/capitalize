@@ -1,0 +1,76 @@
+#!/bin/bash
+
+while getopts ":t" opt; do
+  case "$opt" in
+    t) is_title=true ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+maybe_title() {
+  if [ "$is_title" != true ]; then
+    tee
+  else
+    sed "
+      s/\<As\> \<If\>/as if/g;
+      s/\<As\> \<Long \<As\>/as long as/g;
+      s/\<Even\> \<If\>/even if /g;
+      s/\<If\> \<Only\>/if only/g;
+      s/\<Now\> \<That\>/now that/g;
+      s/\<On\> \<Top\> \<Of\>/on top of/g;
+      s/\<Out\> \<Of\>/out of/g;
+      s/\<So\> \<That\>/so that/g;
+
+      s/\<A\>/a/g;
+      s/\<An\>/an/g;
+      s/\<And\>/and/g;
+      s/\<As\>/as/g;
+      s/\<At\>/at/g;
+      s/\<But\>/but/g;
+      s/\<By\>/by/g;
+      s/\<Down\>/down/g;
+      s/\<For\>/for/g;
+      s/\<From\>/from/g;
+      s/\<If\>/if/g;
+      s/\<In\>/in/g;
+      s/\<Into\>/into/g;
+      s/\<Like\>/like/g;
+      s/\<Near\>/near/g;
+      s/\<Nor\>/nor/g;
+      s/\<Off\>/off/g;
+      s/\<Of\>/of/g;
+      s/\<Once\>/once/g;
+      s/\<On\>/on/g;
+      s/\<Onto\>/onto/g;
+      s/\<Or\>/or/g;
+      s/\<Over\>/over/g;
+      s/\<Past\>/past/g;
+      s/\<So\>/so/g;
+      s/\<Than\>/than/g;
+      s/\<That\>/that/g;
+      s/\<The\>/the/g;
+      s/\<Till\>/till/g;
+      s/\<To\>/to/g;
+      s/\<Upon\>/upon/g;
+      s/\<Up\>/up/g;
+      s/\<When\>/when/g;
+      s/\<With\>/with/g;
+      s/\<Yet\>/yet/g;
+      s/^\(.\)/\u\1/g;
+    "
+  fi 
+}
+
+capitalize() {
+  sed "
+    s/\(.\)/\l\1/g;
+    s/\b\(.\)/\u\1/g;
+    s/'M/'m/g;
+    s/'Re/'re/g;
+    s/'S/'s/g;
+  " | maybe_title
+}
+
+if [ ! -t 0 ]; then capitalize; fi
+if [ -n "$1" ]; then printf "%s\n" "$*" | capitalize; fi
