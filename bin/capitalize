@@ -1,0 +1,125 @@
+#!/bin/bash
+
+while getopts ":t" opt; do
+  case "$opt" in
+    t) is_title=true ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if_title_flag() {
+  if [ "$is_title" == true ]; then
+    sed "
+      s/\<As\> \<If\>/as if/g;
+      s/\<As\> \<Long \<As\>/as long as/g;
+      s/\<Even\> \<If\>/even if /g;
+      s/\<If\> \<Only\>/if only/g;
+      s/\<Now\> \<That\>/now that/g;
+      s/\<On\> \<Top\> \<Of\>/on top of/g;
+      s/\<Out\> \<Of\>/out of/g;
+      s/\<So\> \<That\>/so that/g;
+
+      s/\<A\>/a/g;
+      s/\<Aboard\>/aboard/g;
+      s/\<About\>/about/g;
+      s/\<Above\>/above/g;
+      s/\<Across\>/across/g;
+      s/\<After\>/after/g;
+      s/\<Against\>/against/g;
+      s/\<Along\>/along/g;
+      s/\<Amid\>/amid/g;
+      s/\<Among\>/among/g;
+      s/\<An\>/an/g;
+      s/\<And\>/and/g;
+      s/\<Anti\>/anti/g;
+      s/\<Around\>/around/g;
+      s/\<As\>/as/g;
+      s/\<At\>/at/g;
+      s/\<Before\>/before/g;
+      s/\<Behind\>/behind/g;
+      s/\<Below\>/below/g;
+      s/\<Beneath\>/beneath/g;
+      s/\<Beside\>/beside/g;
+      s/\<Besides\>/besides/g;
+      s/\<Between\>/between/g;
+      s/\<Beyond\>/beyond/g;
+      s/\<But\>/but/g;
+      s/\<By\>/by/g;
+      s/\<Concerning\>/concerning/g;
+      s/\<Considering\>/considering/g;
+      s/\<Despite\>/despite/g;
+      s/\<Down\>/down/g;
+      s/\<During\>/during/g;
+      s/\<Except\>/except/g;
+      s/\<Excepting\>/excepting/g;
+      s/\<Excluding\>/excluding/g;
+      s/\<Following\>/following/g;
+      s/\<For\>/for/g;
+      s/\<From\>/from/g;
+      s/\<If\>/if/g;
+      s/\<In\>/in/g;
+      s/\<Inside\>/inside/g;
+      s/\<Into\>/into/g;
+      s/\<Like\>/like/g;
+      s/\<Minus\>/minus/g;
+      s/\<Near\>/near/g;
+      s/\<Nor\>/nor/g;
+      s/\<Off\>/off/g;
+      s/\<Of\>/of/g;
+      s/\<Once\>/once/g;
+      s/\<On\>/on/g;
+      s/\<Onto\>/onto/g;
+      s/\<Opposite\>/opposite/g;
+      s/\<Or\>/or/g;
+      s/\<Outside\>/outside/g;
+      s/\<Over\>/over/g;
+      s/\<Past\>/past/g;
+      s/\<Per\>/per/g;
+      s/\<Plus\>/plus/g;
+      s/\<Regarding\>/regarding/g;
+      s/\<Round\>/round/g;
+      s/\<Save\>/save/g;
+      s/\<Since\>/since/g;
+      s/\<So\>/so/g;
+      s/\<Than\>/than/g;
+      s/\<That\>/that/g;
+      s/\<The\>/the/g;
+      s/\<Through\>/through/g;
+      s/\<Till\>/till/g;
+      s/\<To\>/to/g;
+      s/\<Towards\>/towards/g;
+      s/\<Toward\>/toward/g;
+      s/\<Underneath\>/underneath/g;
+      s/\<Under\>/under/g;
+      s/\<Unlike\>/unlike/g;
+      s/\<Until\>/until/g;
+      s/\<Upon\>/upon/g;
+      s/\<Up\>/up/g;
+      s/\<Versus\>/versus/g;
+      s/\<Via\>/via/g;
+      s/\<When\>/when/g;
+      s/\<Within\>/within/g;
+      s/\<Without\>/without/g;
+      s/\<With\>/with/g;
+      s/\<Yet\>/yet/g;
+
+      s/^\(.\)/\u\1/g;
+    "
+  else
+    tee
+  fi 
+}
+
+capitalize() {
+  sed "
+    s/\(.\)/\l\1/g;
+    s/\b\(.\)/\u\1/g;
+    s/'M/'m/g;
+    s/'Re/'re/g;
+    s/'S/'s/g;
+  " | if_title_flag
+}
+
+if [ ! -t 0 ]; then capitalize; fi
+if [ -n "$1" ]; then printf "%s\n" "$*" | capitalize; fi

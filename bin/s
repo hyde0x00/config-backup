@@ -1,0 +1,39 @@
+#!/bin/bash
+
+while getopts ":pPV" opt; do
+  case "$opt" in
+    p) print_result=true ;;
+    P) preview_show=true ;;
+    V) preview_vertical=true; preview_show=true ;;
+  esac
+done
+
+fzf=(fzf --preview='__fzf_preview line {}' --delimiter=':' --nth='3..')
+
+[ "$preview_show" != true ] && fzf+=(--preview-window=hidden)
+[ "$preview_vertical" == true ] && fzf+=(--preview-window=right)
+
+select_if_not_empty() {
+  read -r line
+  if [ -n "$line" ]; then
+    (printf "%s\n" "$line"; cat) | "${fzf[@]}"
+  else
+    printf "__NOTHING_FOUND__\n"
+  fi
+}
+
+result="$(g "$@" | select_if_not_empty)"
+
+[ "$result" == __NOTHING_FOUND__ ] && exit 1
+[ "$result" == "" ] && exit 2
+
+[[ $result =~ (.+):([0-9]+):(.+) ]]
+
+file="${BASH_REMATCH[1]}"
+line="${BASH_REMATCH[2]}"
+
+if [ "$print_result" == true ]; then
+  printf "%s\n" "$result"
+else
+  $EDITOR +"$line" "$file"
+fi

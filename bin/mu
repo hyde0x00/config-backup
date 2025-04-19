@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ -z "$MUSIC_DIR" ]; then
+  printf "MUSIC_DIR not set\n"
+  exit 1
+fi
+
+if [ ! -d "$MUSIC_DIR" ]; then
+  printf "Directory not found: '%s'\n" "$MUSIC_DIR"
+  exit 1
+fi
+
+IFS=$'\n' 
+
+current_dir="$PWD"
+cd "$MUSIC_DIR" || exit 1
+
+while read -r sel; do
+  selections+=("${sel/#/$MUSIC_DIR/}")
+done < <(fd -t f | sort -V | fzf -m)
+
+cd "$current_dir"
+
+if [ "${#selections}" -gt 0 ]; then
+  mpv --osd-level=3 "${selections[@]}"
+fi
