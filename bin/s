@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+while getopts ":p" opt; do
+  case "$opt" in
+    p) print_result=true ;;
+  esac
+done
+
+cmd=(fzf --delimiter=':' --nth='3..')
+
+result="$(g "$@" | __fzf_select_if_not_empty "${cmd[@]}")"
+status="$?"
+
+if [ "$status" -ne 0 ]; then
+  exit "$status"
+fi
+
+file="$(echo "$result" | cut -d ':' -f 1)"
+line="$(echo "$result" | cut -d ':' -f 2)"
+
+if [ "$print_result" == true ]; then
+  echo "$result"
+else
+  $EDITOR +"$line" "$file"
+fi

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+lowercase() {
+  sed 's/.*/\L&/g'
+}
+
+if [ ! -t 0 ]; then lowercase; fi
+if [ -n "$1" ]; then echo "$*" | lowercase; fi

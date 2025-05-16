@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ -t 0 ] && [ -z "$1" ]; then
+  echo "Missing filename"
+  exit 1
+fi
+
+less "$@"

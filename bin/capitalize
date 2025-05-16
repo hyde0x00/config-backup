@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+title=true
+
+while getopts ":a" opt; do
+  case "$opt" in
+    a) title=false ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+sub="
+  s/\(.\)/\L\1/g; s/\b\(.\)/\u\1/g;
+  s/[’']\(D\|M\|S\|T\|Ll\|Re\|Ve\)/'\L\1/g;
+"
+
+if [ "$title" == true ]; then
+  words_to_lower=(
+    "As Long As" "As If" "Now That" "Out Of" "So That" 
+    "Even If" "Even Of" "On Top Of" "If Only"
+
+    Outside Off By At As For If Minus Or Yet Like Beside On
+    Inside Despite Under Till Below Considering About Among
+    Following From And Past Behind Within Onto Once A An
+    Anti Opposite Along Up Above In Until Beyond Aboard So
+    Into Around Amid Per Of Upon After Regarding Against But
+    With Down Than Concerning To Between Over When That
+    Except Round Plus Without During Toward Across Towards
+    Via Besides Excepting Near Beneath The Unlike Excluding
+    Through Save Nor Versus Underneath Before Since
+  )
+
+  for word in "${words_to_lower[@]}"; do
+    sub="${sub}; s/\(\<${word}\>\)/\L\1/g;"
+  done
+fi
+
+sub="${sub}; s/^\(.\)/\u\1/g"
+
+if [ ! -t 0 ]; then sed "${sub}"; fi
+if [ -n "$1" ]; then echo "$*" | sed "${sub}"; fi
