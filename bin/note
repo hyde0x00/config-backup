@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+if [ -z "$NOTES_DIR" ]; then
+  echo "NOTES_DIR not set" >&2
+  exit 1
+fi
+
+if [ ! -d "$NOTES_DIR" ]; then
+  mkdir -p "$NOTES_DIR"
+fi
+
+trim_slashes() {
+  case "$1" in
+    */*) echo "$1" | sed 's/\/\+/\//g; s/\/$//g; s/^$/\//g' ;;
+    *) echo "$1" ;;
+  esac
+}
+
+cleanup_and_exit() {
+  find "$NOTES_DIR" -empty -delete
+  exit
+}
+
+create_new_note() {
+  echo -n "New note name: "
+  read -r name
+
+  if [ -z "$name" ]; then
+    exit 1
+  fi
+
+  new_note="$(trim_slashes "$NOTES_DIR/$name")"
+
+  if [ -f "$new_note" ]; then
+    echo "Note '$new_note' already exists, try another name"
+    create_new_note
+  fi
+
+  maybe_dir="$(dirname "$new_note")"
+  mkdir -p "$maybe_dir" 2>/dev/null
+
+  $EDITOR "$new_note"
+  cleanup_and_exit
+}
+
+edit_directory() {
+  find . -type f | vidir -
+  cleanup_and_exit
+}
+
+show_tree() {
+  tree -F "$NOTES_DIR"
+  exit
+}
+
+cd "$NOTES_DIR" || exit 1
+
+while getopts ":net" opt; do
+   case "$opt" in
+     n) create_new_note ;;
+     e) edit_directory ;;
+     t) show_tree ;;
+  esac
+done
+
+if [ -n "$1" ]; then
+  s "$@" .
+else
+  f .
+fi
+
+cleanup_and_exit

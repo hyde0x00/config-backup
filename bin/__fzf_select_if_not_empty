@@ -1,0 +1,9 @@
+#!/bin/bash
+
+read -r line
+[ -z "$line" ] && exit 1 
+
+result="$((echo "$line"; cat) | "$@")"
+[ -z "$result" ] && exit 2 
+
+echo "$result"
