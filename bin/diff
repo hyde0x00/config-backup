@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+cmd=(/usr/bin/diff --palette=ad=92:de=91:ln=90)
+
+hide_color_flags() {
+  sed "/^diff/{s/'--palette=.*' //; s/'--color=.*' //}"
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -f) force_color=true ;;
+    -p) pager=true ;;
+    *) forward+=("$1") ;;
+  esac
+  shift
+done
+
+set -- "${forward[@]}"
+
+if [ "$pager" == true ]; then
+  "${cmd[@]}" --color=always "$@" | hide_color_flags | less
+elif [ -t 1 ] || [ "$force_color" == true ]; then
+  "${cmd[@]}" --color=always "$@" | hide_color_flags
+else
+  "${cmd[@]}" "$@" | hide_color_flags
+fi
+
+exit 0

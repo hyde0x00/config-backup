@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  exit 1
+fi
+
+fzf_command=("$@")
+
+read -r line
+[ -z "$line" ] && exit 1
+
+result="$((echo "$line"; cat) | "${fzf_command[@]}")"
+[ -z "$result" ] && exit 2
+
+echo "$result"

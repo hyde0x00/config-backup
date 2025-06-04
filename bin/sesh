@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# https://github.com/thoughtbot/dotfiles/blob/main/bin/tat
+# https://github.com/ThePrimeagen/.dotfiles/blob/master/bin/.local/scripts/tmux-sessionizer
+
+while getopts ":j" opt; do
+  case "$opt" in
+    j) jump_dir=true; shift ;;
+  esac
+done
+
+if [ "$jump_dir" != true ]; then
+  path="${1-$PWD}"
+else
+  path="$(__find_dir "$@")"
+  if [ -z "$path" ]; then
+    exit 1
+  fi
+fi
+
+path="$(realpath "$path" 2>/dev/null)"
+
+if [ "$jump_dir" != true ] && [ $# -gt 1 ] || [ ! -d "$path" ]; then
+  echo "Usage: $(basename "$0") [-j [jump_in_directory ...]] [working_directory]"
+  exit 1
+fi
+
+if [ "$path" != "$HOME" ]; then
+  name="$(basename "$path" | tr . _)"
+else
+  name=home
+fi
+
+if [ -z "$TMUX" ] && [ -z "$(pgrep tmux)" ]; then
+  tmux new-session -s "$name" -c "$path"
+  exit 0
+fi
+
+if ! tmux has-session -t "=$name" 2>/dev/null; then
+  tmux new-session -d -s "$name" -c "$path"
+fi
+
+if [ -z "$TMUX" ]; then
+  tmux attach-session -t "$name"
+else
+  tmux switch-client -t "$name"
+fi

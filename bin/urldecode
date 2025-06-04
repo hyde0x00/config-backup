@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+urldecode() {
+  perl -pe 's/\%(\w\w)/chr hex $1/ge'
+}
+
+if [ ! -t 0 ]; then urldecode; fi
+if [ -n "$1" ]; then echo "$*" | urldecode; fi

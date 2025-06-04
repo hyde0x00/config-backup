@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+_grep=(grep -nHIs)
+
+while getopts ":ard:m:n:cCw" opt; do
+  case "$opt" in
+    a|r) forward+=("-$opt") ;;
+    d|m|n) forward+=("-$opt" "$OPTARG") ;;
+    c) _grep+=("--ignore-case") ;;
+    C) _grep+=("--no-ignore-case") ;;
+    w) _grep+=("--word-regexp") ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+pattern="$1"; shift
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+fd -t f -0 "${forward[@]}" "$@" | xargs -0 "${_grep[@]}" -- "$pattern" 2>/dev/null

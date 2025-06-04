@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+cmd=(fzf --delimiter=':' --nth='3..')
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -p) print_result=true ;;
+    *) forward+=("$1") ;;
+  esac
+  shift
+done
+
+set -- "${forward[@]}"
+
+result="$(g "$@" | __fzf_select_if_not_empty "${cmd[@]}")"
+
+status=$?
+
+if [ "$status" -ne 0 ]; then
+  exit "$status"
+fi
+
+file="$(echo "$result" | cut -d ':' -f 1)"
+line="$(echo "$result" | cut -d ':' -f 2)"
+
+if [ "$print_result" != true ]; then
+  $EDITOR +"$line" "$file"
+else
+  echo "$result"
+fi

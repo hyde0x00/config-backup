@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+uppercase() {
+  sed 's/.*/\U&/g'
+}
+
+if [ ! -t 0 ]; then uppercase; fi
+if [ -n "$1" ]; then echo "$*" | uppercase; fi

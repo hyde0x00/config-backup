@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+title=true
+
+while getopts "a" opt; do
+  case "$opt" in
+    a) title=false ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+sub="
+  s/\(.\)/\L\1/g; s/\b\(.\)/\u\1/g;
+  s/[’']\(D\|M\|S\|T\|Ll\|Re\|Ve\)/'\L\1/g;
+"
+
+if [ "$title" == true ]; then
+  ignore_words=(
+    A And As At But By Down For From If In
+    Into Like Near Nor Of Off On Once Onto Or
+    Over Past So Than That The To Upon When
+    With Yet
+  )
+
+  for word in "${ignore_words[@]}"; do
+    sub="${sub}; s/\(\<${word}\>\)/\L\1/g;"
+  done
+fi
+
+sub="${sub}; s/^\(.\)/\u\1/g"
+
+if [ ! -t 0 ]; then sed "${sub}"; fi
+if [ -n "$1" ]; then echo "$*" | sed "${sub}"; fi
+
