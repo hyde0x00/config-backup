@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+if [ -z "$NOTES_DIR" ]; then
+  echo "NOTES_DIR not set" >&2
+  exit 1
+fi
+
+if [ ! -d "$NOTES_DIR" ]; then
+  mkdir -p "$NOTES_DIR"
+fi
+
+create_new_note() {
+  echo -n "New note name: "
+
+  read -r name
+  if [ -z "$name" ]; then
+    exit 1
+  fi
+
+  new_note="$(realpath --canonicalize-missing "$NOTES_DIR/$name")"
+
+  if [ -e "$new_note" ]; then
+    echo "'$new_note' already exists, try another name"
+    create_new_note
+  fi
+
+  maybe_dir="$(dirname "$new_note")"
+  mkdir -p "$maybe_dir" 2>/dev/null
+
+  $EDITOR "$new_note"
+  exit
+}
+
+edit_directory() {
+  fd -t f "$NOTES_DIR" | vidir -
+  exit
+}
+
+show_tree() {
+  tree -F "$NOTES_DIR"
+  exit
+}
+
+search_in_notes() {
+  sel="$(g "$@" "$NOTES_DIR" \
+    | sed "s|^${NOTES_DIR}/||" | __select_with fzf)"
+
+  status="$?"
+
+  if [ "$status" -ne 0 ]; then
+    exit "$status"
+  fi
+
+  if [ "$print_result" == true ]; then
+    echo "$NOTES_DIR/$sel"
+  else
+    file="$NOTES_DIR/$(echo "$sel" | cut -d ':' -f 1)"
+    line="$(echo "$sel" | cut -d ':' -f 2)"
+    $EDITOR +"$line" "$file"
+  fi
+}
+
+find_note() {
+  sel="$(fd -t f "$NOTES_DIR" \
+    | sed "s|^${NOTES_DIR}/||" | __select_with fzf)"
+
+  status="$?"
+
+  if [ "$status" -ne 0 ]; then
+    exit "$status"
+  fi
+
+  if [ "$print_result" == true ]; then
+    echo "$NOTES_DIR/$sel"
+  else
+    $EDITOR "$NOTES_DIR/$sel"
+  fi
+}
+
+cleanup() {
+  find "$NOTES_DIR" -empty -delete
+}
+
+usage() {
+  echo "Usage: $(basename "$0") [-netp] [[-cCwF] pattern]"
+  exit 1
+}
+
+while getopts ":cCwnetp" opt; do
+  case "$opt" in
+    c|C|w) forward+=("-$opt") ;;
+    n) create_new_note ;;
+    e) edit_directory ;;
+    t) show_tree ;;
+    p) print_result=true ;;
+    :|*) usage ;; 
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ $# -gt 1 ]; then
+  usage
+fi 
+
+cleanup
+
+pattern="$1"
+if [ -n "$pattern" ]; then
+  search_in_notes "${forward[@]}" "$pattern"
+else
+  find_note
+fi

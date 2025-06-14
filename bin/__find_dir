@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+result="$(fd -t d "$@" | __fzf_select_if_not_empty fzf)"
+
+status=$?
+
+if [ "$status" -ne 0 ]; then
+  exit "$status"
+fi
+
+echo "$result"

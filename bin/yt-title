@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+yt_title() {
+  url="$1"
+  title="$(yt-dlp -J "$url" 2>/dev/null | jq -r '.title')"
+
+  if [ "$title" == null ]; then
+    echo "$url"
+  else
+    echo "[$title]($url)"
+  fi
+}
+
+if [ ! -t 0 ]; then while read -r url; do yt_title "$url"; done; fi
+if [ -n "$1" ]; then for url in "$@"; do yt_title "$url"; done; fi
