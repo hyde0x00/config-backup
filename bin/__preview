@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+GREY=$'\e[90m'
+REVERSE=$'\e[7m'
+RESET=$'\e[0;0m'
+
+show_message() {
+  color="$GREY$REVERSE"
+  pad="$((COLUMNS + ${#color}))"
+  message="$1"
+  printf "%*s%b\n" "$pad" "$color$message" "$RESET"
+}
+
+show_message_if_empty() {
+  read -r line
+  if [ -z "$line" ]; then
+    show_message "$1"
+  else
+    (echo "$line"; cat)
+  fi
+}
+
+preview_directory() {
+  fd -d 1 "$@" | show_message_if_empty "Nothing to preview"
+}
+
+preview_file() {
+  case "$(file --brief --dereference -- "$1")" in
+    *text*) cat -- "$1" ;;
+    *) show_message "$(file --mime-type --brief --dereference -- "$1")" ;;
+  esac
+}
+
+preview_line() {
+  [[ $* =~ (.*):([0-9]+):(.*) ]]
+
+  file="${BASH_REMATCH[1]}"
+  line="${BASH_REMATCH[2]}"
+
+  start=$((line - (LINES / 2)))
+  end=$((start + LINES - 1))
+
+  while [ "$start" -lt 1 ]; do
+    pad="$pad\n"
+    ((start++))
+  done
+
+  result="$(sed --quiet -- "$start","$end"p "$file")"
+  printf "%b%s\n" "$pad" "$result" | sed '$s/^\(.\{'$((COLUMNS-1))'\}\).*$/\1/'
+}
+
+preview_type="$1"
+shift
+
+case "$preview_type" in
+  directory)
+    preview_directory "$@"
+    ;;
+  file)
+    preview_file "$@"
+    ;;
+  line)
+    preview_line "$@"
+    ;;
+  *)
+    echo "Unknown preview type: '$preview_type'"
+    exit 1
+    ;;
+esac
