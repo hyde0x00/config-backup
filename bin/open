@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+usage() {
+  echo "Usage: $(basename "$0") <file|URL>"
+  exit 1
+}
+
+if [ $# -ne 1 ]; then
+  usage
+fi
+
+type="$(file --brief --dereference -- "$1")"
+
+case "$type" in
+  empty|*text*) $EDITOR "$1" ;;
+  *) xdg-open "$1" ;;
+esac

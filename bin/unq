@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+while getopts ":r" opt; do
+   case "$opt" in
+     r) keep_last=true ;;
+     *) exit 1 ;;
+   esac
+done
+
+shift $((OPTIND-1))
+
+uniq_lines() {
+  if [ "$keep_last" != true ]; then
+    awk '/^\s*$/ { print; next; }; !seen[$0]++'
+  else
+    tac | awk '/^\s*$/ { print; next; }; !seen[$0]++' | tac
+  fi
+}
+
+if [ ! -t 0 ]; then uniq_lines; fi
+if [ -n "$1" ]; then cat "$@" | uniq_lines; fi
