@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+while getopts ":r" opt; do
+   case "$opt" in
+     r) reverse=true ;;
+     *) exit 1 ;;
+   esac
+done
+
+shift $((OPTIND-1))
+
+if [ "$reverse" == true ]; then
+    awk '{ print length, $0 }' | sort -n | cut -d" " -f2- | tac
+else 
+    awk '{ print length, $0 }' | sort -n | cut -d" " -f2-
+fi
