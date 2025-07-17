@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  exit 1
+fi
+
+read -r line
+[ -z "$line" ] && exit 1
+result="$((echo "$line"; cat) | "$@")"
+[ -z "$result" ] && exit 2
+
+echo "$result"

@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+if [ -z "$NOTES_DIR" ]; then
+  echo "NOTES_DIR not set" >&2
+  exit 1
+fi
+
+if [ ! -d "$NOTES_DIR" ]; then
+  mkdir -p "$NOTES_DIR"
+fi
+
+edit_directory() {
+  fd -t f "$NOTES_DIR" | vidir -
+  exit 0
+}
+
+show_tree() {
+  tree -F "$NOTES_DIR"
+  exit 0
+}
+
+search_in_notes() {
+  sel="$(g "$@" "$NOTES_DIR" | sed "s|^${NOTES_DIR}/||" | __select_with fzf --delimiter=':' --nth='3..')"
+
+  status=$?
+
+  if [ "$status" -ne 0 ]; then
+    exit "$status"
+  fi
+
+  if [ "$print_result" == true ]; then
+    echo "$NOTES_DIR/$sel"
+  else
+    file="$(echo "$sel" | cut -d ':' -f 1)"
+    line="$(echo "$sel" | cut -d ':' -f 2)"
+    $EDITOR +"$line" "$NOTES_DIR/$file"
+  fi
+}
+
+find_note() {
+  export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --bind=alt-enter:print-query"
+
+  sel="$(fd -t f "$NOTES_DIR" | sed "s|^${NOTES_DIR}/||" | __select_with fzf)"
+
+  status=$?
+
+  if [ "$status" -ne 0 ]; then
+    exit "$status"
+  fi
+
+  if [ "$print_result" == true ]; then
+    echo "$NOTES_DIR/$sel"
+  else
+    $EDITOR "$NOTES_DIR/$sel"
+  fi
+}
+
+cleanup() {
+  find "$NOTES_DIR" -empty -delete
+}
+
+while getopts ":etpcCw" opt; do
+  case "$opt" in
+    e) edit_directory ;;
+    t) show_tree ;;
+    p) print_result=true ;;
+    c|C|w) forward_args+=("-$opt") ;;
+    *) exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ $# -gt 1 ]; then
+  exit 1
+fi
+
+cleanup
+
+pattern="$1"
+
+if [ -n "$pattern" ]; then
+  search_in_notes "${forward_args[@]}" "$pattern"
+else
+  find_note
+fi
