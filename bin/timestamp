@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+while getopts ":u" opt; do
+  case "$opt" in
+    u) zero_offset=true ;;
+    *) exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+format='%b %d %H:%M:%S'
+
+if [ "$zero_offset" == true ]; then
+    date --universal +"$format (UTC)"
+else
+    date +"$format"
+fi

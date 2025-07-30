@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+date --universal +'%Y%m%d%H%M%S'Z
