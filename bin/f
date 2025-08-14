@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+action=open
+
+while getopts ":ard:m:n:epx" opt; do
+  case "$opt" in
+    a|r) forward_args+=("-$opt") ;;
+    d|m|n) forward_args+=("-$opt" "$OPTARG") ;;
+    e) action=edit ;;
+    p) action=print ;;
+    x) action=xdg ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+result="$(fd -t f "${forward_args[@]}" "$@" | __select_with fzf)"
+status="$?"
+
+if [ "$status" -ne 0 ]; then
+  exit "$status"
+fi
+
+case "$action" in
+  open) open "$result" ;;
+  edit) $EDITOR "$result" ;;
+  print) echo "$result" ;;
+  xdg) xdg-open "$result" ;;
+esac

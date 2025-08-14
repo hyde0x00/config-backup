@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+title=true
+
+while getopts "a" opt; do
+  case "$opt" in
+    a) title=false ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+sub="
+  s/\b\([а-яa-z0-9]\)\([А-Яа-яA-Za-z0-9]*\)\b/\u\1\2/g;
+  s/[’']\(D\|M\|S\|T\|Ll\|Re\|Ve\)/'\L\1/g;
+"
+
+if [ "$title" == true ]; then
+  lowercase_words=(
+    "As If" "As Long As" "Even If" "If Only" "Now That" "On Top Of"
+    "Out Of" "So That"
+    A An And As At But By Down For From If In Into Like Near Nor Of
+    Off On Once Onto Or Over Past Per So Than That The Till To Up
+    Upon Via When With Yet
+  )
+
+  for word in "${lowercase_words[@]}"; do
+    sub="${sub}; s/\(\<${word}\>\)/\L\1/g;"
+  done
+fi
+
+sed "${sub}; s/^\(.\)/\u\1/g"

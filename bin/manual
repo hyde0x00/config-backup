@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+result="$(man --apropos "$1" 2>/dev/null | ifne fzf)"
+
+if [ -z "$result" ]; then
+  exit 1
+fi
+
+read -r manpage section description <<< "$result"
+section="$(echo "$section" | tr -d '()')"
+
+man "$section" "$manpage" 2>/dev/null

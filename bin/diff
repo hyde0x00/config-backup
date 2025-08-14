@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+grey=$'\e[90m'
+bred=$'\e[91m'
+bgreen=$'\e[92m'
+reset=$'\e[0;0m'
+
+colorize() {
+  sed '
+    /^[0-9]/ { s/^/'$grey'/; s/$/'$reset'/; };
+    /^</ { s/^/'$bred'/; s/$/'$reset'/; };
+    /^>/ { s/^/'$bgreen'/; s/$/'$reset'/; };
+  '
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -f) force_color=true ;;
+    -p) pager=true ;;
+    *) forward_args+=("$1") ;;
+  esac
+  shift
+done
+
+set -- "${forward_args[@]}"
+
+if [ "$pager" == true ]; then
+  /usr/bin/diff "$@" | colorize | less
+elif [ -t 1 ] || [ "$force_color" == true ]; then
+  /usr/bin/diff "$@" | colorize
+else
+  /usr/bin/diff "$@"
+fi
