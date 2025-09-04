@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  exit 1
+fi
+
+read -r line
+if [ -z "$line" ]; then
+  # echo "Nothing found" >&2
+  exit 1
+fi
+
+result="$((echo "$line"; cat) | "$@")"
+if [ -z "$result" ]; then
+  # echo "Selection aborted" >&2
+  exit 2
+fi
+
+echo "$result"
