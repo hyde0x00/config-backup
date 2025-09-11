@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -p) print_result=true ;;
+    *) forward_args+=("$1") ;;
+  esac
+  shift
+done
+
+result="$(g "${forward_args[@]}" | __select_with fzf --delimiter=':' --nth='3..')"
+status="$?"
+
+if [ "$status" -ne 0 ]; then
+  exit "$status"
+fi
+
+result="${result:0:4096}"
+[[ $result =~ ^(.*):([0-9]+): ]]
+
+file="${BASH_REMATCH[1]}"
+line="${BASH_REMATCH[2]}"
+
+if [ "$print_result" == true ]; then
+  echo "$result"
+else
+  $EDITOR +"$line" "$file"
+fi

@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+if [ -z "$NOTES_DIR" ]; then
+  echo "NOTES_DIR not set" >&2
+  exit 1
+fi
+
+if [ ! -d "$NOTES_DIR" ]; then
+  mkdir -p "$NOTES_DIR"
+fi
+
+show_tree() {
+  tree -F "$NOTES_DIR"
+  exit 0
+}
+
+edit_directory() {
+  fd -t f "$NOTES_DIR" | vidir -
+  exit 0
+}
+
+cleanup() {
+  find "$NOTES_DIR" -empty -delete
+}
+
+find_note() {
+  export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --bind=alt-enter:print-query"
+
+  result="$(fd -t f "$NOTES_DIR" | sed "s|^${NOTES_DIR}/||" | __select_with fzf)"
+  status="$?"
+
+  if [ "$status" -ne 0 ]; then
+    exit "$status"
+  fi
+
+  if [ "$print_result" != true ]; then
+    $EDITOR "$NOTES_DIR/$result"
+  else
+    echo "$NOTES_DIR/$result"
+  fi
+}
+
+search_in_notes() {
+  result="$(g "$@" "$NOTES_DIR" | sed "s|^${NOTES_DIR}/||" | __select_with fzf --delimiter=':' --nth='3..')"
+  status="$?"
+
+  if [ "$status" -ne 0 ]; then
+    exit "$status"
+  fi
+
+  if [ "$print_result" == true ]; then
+    echo "$NOTES_DIR/$result"
+  else
+    result="${result:0:4096}"
+    [[ $result =~ ^(.*):([0-9]+): ]]
+
+    file="${BASH_REMATCH[1]}"
+    line="${BASH_REMATCH[2]}"
+
+    $EDITOR +"$line" "$NOTES_DIR/$file"
+  fi
+}
+
+while getopts ":tepcCw" opt; do
+  case "$opt" in
+    t) show_tree ;;
+    e) edit_directory ;;
+    p) print_result=true ;;
+    c|C|w) forward_args+=("-$opt") ;;
+    *) exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ $# -gt 1 ]; then
+  exit 1
+fi
+
+cleanup
+
+pattern="$1"
+
+if [ -n "$pattern" ]; then
+  search_in_notes -c "${forward_args[@]}" "$pattern"
+else
+  find_note
+fi
