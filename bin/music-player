@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# https://wiki.archlinux.org/title/Music_Player_Daemon
+# https://help.ubuntu.com/community/MPD
+# https://fedoramagazine.org/playing-music-on-your-fedora-terminal-with-mpd-and-ncmpcpp/
+# https://news.opensuse.org/2020/03/31/Listen-to-your-music-with-mpd-and-ncmpcpp/
+
+[ -z "$(pgrep mpd)" ] && mpd 2>/dev/null
+ncmpcpp -q
