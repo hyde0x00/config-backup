@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+while getopts "ard:m:n:t:0" opt; do
+  case "$opt" in
+    a) show_hidden=true ;;
+    r) absolute_path=true ;;
+    d) max_depth="$OPTARG" ;;
+    m) min_depth="$OPTARG" ;;
+    n) name="$OPTARG" ;;
+    t) type="$OPTARG" ;;
+    0) null_terminated=true ;;
+    :) exit 1 ;;
+    *) exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+trim_slashes() {
+  case "$1" in
+    */*) echo "$1" | sed 's/\/\+/\//g; s/\/$//g; s/^$/\//g' ;;
+    *) echo "$1" ;;
+  esac
+}
+
+cut_dotslash() {
+  if [ "$null_terminated" == true ]; then
+    sed -z 's/^\.\///'
+  else
+    sed 's/^\.\///'
+  fi
+}
+
+find_with_options() {
+  local -a options
+  local -a paths
+
+  if [ -n "$max_depth" ]; then
+    if [[ "$max_depth" =~ ^[1-9][0-9]*$ ]]; then
+      options+=(-maxdepth "$max_depth")
+    else
+      echo "$0: option requires a positive decimal integer argument -- d" 1>&2
+      exit 1
+    fi
+  fi
+
+  if [ -n "$min_depth" ]; then
+    if [[ "$min_depth" =~ ^[1-9][0-9]*$ ]]; then
+      options+=(-mindepth "$min_depth")
+    else
+      echo "$0: option requires a positive decimal integer argument -- m" 1>&2
+      exit 1
+    fi
+  fi
+
+  [ -n "$name" ] && options+=(-name "$name")
+  [ -n "$type" ] && options+=(-type "$type")
+
+  for path; do
+    if [ "$absolute_path" == true ]; then
+      path="$(realpath "$path")"
+    else
+      path="$(trim_slashes "$path")"
+    fi
+
+    paths+=("$path")
+
+    if [ -d "$path" ]; then
+      options+=(-not -path "$path")
+    fi
+
+    if [ "$show_hidden" != true ] && [ -d "$path" ]; then
+      options+=(
+        -not \( 
+          -path "$path/.*" -prune
+          -or 
+          -path "$path*/.*" -prune 
+        \)
+      )
+    fi
+  done
+
+  if [ "$null_terminated" == true ]; then
+    options+=(\( -type d -printf '%p/\0' -or -print0 \))
+  else
+    options+=(\( -type d -printf '%p/\n' -or -print \))
+  fi
+
+  find -L "${paths[@]}" "${options[@]}" 2>/dev/null | cut_dotslash
+}
+
+if [ -z "$1" ]; then
+  set -- '.'
+fi
+
+find_with_options "$@"
