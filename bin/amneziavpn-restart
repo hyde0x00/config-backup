@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# https://github.com/amnezia-vpn/amnezia-client/issues/1268#issuecomment-2700796935
+# https://askubuntu.com/questions/1313479/correct-way-to-execute-a-script-on-resume-from-suspend
+
+case "$1" in
+  pre)
+    echo "killall amnezia" ;; 
+  post)
+    echo "start amnezia again" ;; 
+esac

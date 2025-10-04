@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# https://superuser.com/questions/268985/remove-audio-from-video-file-with-ffmpeg
+
+remove_audio() {
+  if [ ! -f "$1" ]; then
+    echo "Not a file: '$1'" >&2
+    return 1
+  fi
+
+  input="$1"
+
+  dir="$(dirname "$input")"
+  bname="$(basename "$input")"
+  noextname="${bname%\.*}"
+  ext="${input##*\.}"
+  output="$dir/$noextname"_noaudio."$ext"
+
+  ffmpeg -n -i "$input" -vcodec copy -an "$output"
+}
+
+for file; do remove_audio "$file"; done
