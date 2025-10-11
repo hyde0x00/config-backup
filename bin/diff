@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+# red=$'\e[48;5;52m'
+# red=$'\e[48;5;88m'
+red=$'\e[7m\e[31m'
+grey=$'\e[90m'
+bred=$'\e[91m'
+bgreen=$'\e[92m'
+reset=$'\e[0;0m'
+
+colorize() {
+  if [ "$highlight_whitespace" == true ]; then
+    sub="{ s/\(\s\+\)$/$red\1$reset/; }"
+  else
+    sub=""
+  fi
+
+  sub+="
+    /^[0-9]/ { s/^/$grey/;   s/$/$reset/; };
+    /^</     { s/^/$bred/;   s/$/$reset/; };
+    /^>/     { s/^/$bgreen/; s/$/$reset/; };
+  "
+
+  sed "$sub"
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -f) force_color=true ;;
+    -p) pager=true ;;
+    -w) highlight_whitespace=true ;;
+    *) forward_args+=("$1") ;;
+  esac
+  shift
+done
+
+set -- "${forward_args[@]}"
+
+if [ "$pager" == true ]; then
+  /usr/bin/diff "$@" | colorize | less
+elif [ -t 1 ] || [ "$force_color" == true ]; then
+  /usr/bin/diff "$@" | colorize
+else
+  /usr/bin/diff "$@"
+fi

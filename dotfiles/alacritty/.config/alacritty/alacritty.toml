@@ -1,0 +1,91 @@
+[window.dimensions]
+columns = 80
+lines = 24
+
+[font]
+size = 12
+
+[font.normal]
+# family = 'AdwaitaMono'
+# family = 'JetBrainsMono'
+family = 'Menlo'
+# family = 'Terminus'
+
+[font.bold]
+style = 'Regular'
+
+[font.italic]
+style = 'Regular'
+
+[font.bold_italic]
+style = 'Regular'
+
+[cursor]
+blink_interval = 750
+blink_timeout = 0
+thickness = 0.1
+
+[cursor.style]
+blinking = 'Always'
+shape = 'Block'
+
+[keyboard]
+bindings = [
+  { key = 'F11', action = 'ToggleFullscreen' },
+  { key = '0', mods = 'Control', action = 'None' },
+  { key = '-', mods = 'Control', action = 'None' },
+  { key = '=', mods = 'Control', action = 'None' },
+  { key = ')', mods = 'Control|Shift', action = 'ResetFontSize' },
+  { key = '_', mods = 'Control|Shift', action = 'DecreaseFontSize' },
+  { key = '+', mods = 'Control|Shift', action = 'IncreaseFontSize' },
+]
+
+[[hints.enabled]]
+command = ''
+hyperlinks = false
+post_processing = false
+persist = false
+mouse.enabled = false
+regex = ''
+
+[mouse]
+hide_when_typing = true
+
+[colors]
+draw_bold_text_with_bright_colors = true
+
+[colors.footer_bar]
+foreground = '0xcc7700'
+background = '0x000000'
+
+[colors.search.matches]
+foreground = '0x000000'
+background = '0xffff77'
+
+[colors.search.focused_match]
+foreground = '0xffffff'
+background = '0xcc7700'
+
+[colors.primary]
+foreground = '0xffffff'
+background = '0x000000'
+
+[colors.normal]
+black   = '0x000000'
+red     = '0xcc0000'
+green   = '0x00cc00'
+yellow  = '0xcc7700'
+blue    = '0x0000ff'
+magenta = '0xcc00cc'
+cyan    = '0x00cccc'
+white   = '0xcccccc'
+
+[colors.bright]
+black   = '0x777777'
+red     = '0xff7777'
+green   = '0x77ff77'
+yellow  = '0xffff77'
+blue    = '0x7777ff'
+magenta = '0xff77ff'
+cyan    = '0x77ffff'
+white   = '0xffffff'

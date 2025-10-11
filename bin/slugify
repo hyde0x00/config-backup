@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+translit=false
+ignored='\t'
+space='-'
+end_dots=0
+
+while getopts ":ts:d:i:" opt; do
+  case "$opt" in
+    t) translit=true ;;
+    s) space="$OPTARG" ;;
+    d) end_dots="$OPTARG" ;;
+    i) ignored="${ignored}${OPTARG}" ;;
+    *) exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+# https://iuliia.ru/mosmetro/
+
+transliterate() {
+  if [ "$translit" == true ]; then
+    sed "
+      s/[ьъ]a/ya/g; s/[ьъ][еэ]/ye/g; s/[ьъ]ё/yo/g; s/[ьъ]и/yi/g;
+      s/[ьъ]о/yo/g; s/[ьъ]у/yu/g; s/тц/ts/g; s/[иы]й/y/g; 
+      s/а/a/g; s/б/b/g; s/в/v/g; s/г/g/g; s/д/d/g; s/е/e/g; s/ё/e/g;
+      s/ж/zh/g; s/з/z/g; s/и/i/g; s/й/y/g; s/к/k/g; s/л/l/g; s/м/m/g;
+      s/н/n/g; s/о/o/g; s/п/p/g; s/р/r/g; s/с/s/g; s/т/t/g; s/у/u/g;
+      s/ф/f/g; s/х/kh/g; s/ц/ts/g; s/ч/ch/g; s/ш/sh/g; s/щ/sch/g;
+      s/[ъь]//g; s/ы/y/g; s/э/e/g; s/ю/yu/g; s/я/ya/g
+    "
+  else
+    tee
+  fi
+}
+
+replace_dots() {
+  if [ "$end_dots" -gt 0 ]; then
+    rev | sed "s/\./${space}/$((end_dots+1))g" | rev
+  else
+    sed "s/\./${space}/g"
+  fi
+}
+
+cleanup() {
+  sed "
+    s/${space}\+/${space}/g;
+    s/${space}\././g;
+    s/^${space}\+//;
+    s/${space}\+$//
+  "
+}
+
+if [ "$end_dots" -gt 0 ]; then
+  ignored="${ignored}."
+fi
+
+sed "s/[^[:alnum:]${ignored}]\+/${space}/g; s/.*/\L&/g" \
+  | replace_dots | transliterate | cleanup

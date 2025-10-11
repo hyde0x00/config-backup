@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+while getopts ":j" opt; do
+  case "$opt" in
+    j) use_jump=true; shift ;;
+  esac
+done
+
+if [ "$use_jump" == true ]; then
+  path="$(__jump_dir "$@")"
+  if [ -z "$path" ]; then
+    exit 1
+  fi
+  set -- "$path"
+fi
+
+if [ -z "$1" ]; then
+  set -- "$PWD"
+fi
+
+if [ $# -gt 3 ]; then
+  if ! confirm "Create sessions for $# arguments?"; then
+    exit 1
+  fi
+fi
+
+for path in "$@"; do
+  if [ ! -d "$path" ]; then
+    echo "Not a directory: '$path'" >&2
+    continue
+  fi
+
+  path="$(realpath "$path")"
+
+  if [ "$path" == "$HOME" ]; then
+    name=home
+  else
+    name="$(basename "$path" | tr . _)"
+  fi
+
+  if ! tmux has-session -t ="$name" 2>/dev/null; then
+    tmux new-session -d -c "$path" -s "$name"
+  fi
+done
+
+if [ -z "$name" ]; then
+  exit 1
+fi
+
+if [ -n "$TMUX" ]; then
+  tmux switch-client -t "$name"
+else
+  tmux attach-session -t "$name"
+fi

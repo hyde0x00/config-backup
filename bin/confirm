@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+if [ -n "$1" ]; then
+  message="$*"
+else
+  message="Confirm"
+fi
+
+echo -n "$message [y/n] "
+read -r yn
+
+case "${yn,,}" in
+  y|yes) exit 0 ;;
+  n|no)  exit 1 ;;
+  *) confirm "$*" ;;
+esac

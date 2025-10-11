@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+grep=(grep -I --line-number --with-filename --no-messages)
+
+while getopts ":ard:m:n:cCw" opt; do
+  case "$opt" in
+    a|r) forward_args+=("-$opt") ;;
+    d|m|n) forward_args+=("-$opt" "$OPTARG") ;;
+    c) grep+=("--ignore-case") ;;
+    C) grep+=("--no-ignore-case") ;;
+    w) grep+=("--word-regexp") ;;
+    *) exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+pattern="$1"; shift
+
+if [ -n "$1" ]; then
+  paths=("$@")
+else
+  paths='.'
+fi
+
+fd -t f -0 "${forward_args[@]}" "${paths[@]}" \
+  | xargs -0 "${grep[@]}" -- "$pattern" 2>/dev/null

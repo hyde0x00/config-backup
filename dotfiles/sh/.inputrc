@@ -1,0 +1,6 @@
+set editing-mode vi
+set enable-bracketed-paste off
+set completion-query-items 0
+set match-hidden-files off
+set page-completions off
+set show-all-if-ambiguous on

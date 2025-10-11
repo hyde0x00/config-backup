@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+TRASH_DIR="$HOME/.local/share/Trash/files"
+
+usage() {
+  echo "Usage: $(basename "$0") [-eltr] [file ...]"
+  exit 1
+}
+
+move_to_trash() {
+  if [ ! -e "$1" ]; then
+    echo "No such file or directory: '$1'" >&2
+    return 1
+  fi
+
+  error="$(gio trash "$1" 2>&1 >/dev/null)"
+  if [ $? -ne 0 ]; then
+    echo "$error" >&2
+    return 1
+  fi
+
+  echo "Moved '$1' to trash"
+}
+
+have_files() {
+  count="$(fd -d 1 "$TRASH_DIR" | wc -l)"
+  if [ "$count" -eq 0 ]; then
+    echo "Trash is empty" >&2
+    return 1
+  fi
+}
+
+empty_trash() {
+  if confirm "Empty trash?" && have_files; then
+    gio trash --empty
+  fi
+  exit
+}
+
+list_files() {
+  if have_files; then
+    ls -lActr "$TRASH_DIR"
+  fi
+  exit
+}
+
+show_tree() {
+  if have_files; then
+    tree -F "$TRASH_DIR"
+  fi
+  exit
+}
+
+restore_files() {
+  selected=($(gio trash --list | __select_with fzf -m | cut -f 1))
+  if [ "${#selected[@]}" -gt 0 ]; then
+    gio trash --restore "${selected[@]}"
+  fi
+  exit
+}
+
+while getopts ":eltr" opt; do
+   case "$opt" in
+     e) empty_trash ;;
+     l) list_files ;;
+     t) show_tree ;;
+     r) restore_files ;;
+     *) usage ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ -z "$1" ]; then
+  usage
+fi
+
+for file in "$@"; do
+  move_to_trash "$file"
+done
